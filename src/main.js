@@ -1,16 +1,14 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 
-import PrimeVue from 'primevue/config';
-import Dialog from 'primevue/dialog';
-import Button from 'primevue/button';
-import 'primeflex/primeflex.css';
-
+import PrimeConfig from './config/primevue'
+import { fabric } from "fabric";
+// console.log( fabric );
+// import 'primeflex/primeflex.css';
 
 const app = createApp(App);
-app.use(PrimeVue);
-app.component('Dialog', Dialog);
-app.component('Button', Button);
+PrimeConfig(app);
+app.config.globalProperties.$fabric = fabric;
 
 app.mount('#app');
-// createApp(App).mount('#app')
+// console.log( 222 );
