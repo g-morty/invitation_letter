@@ -1,19 +1,17 @@
 <template>
-  <div>
-    <Button>按钮</Button>
-  </div>
+  <app-home></app-home>
 </template>
 
 <script>
-import { getCurrentInstance } from "vue";
+import {} from "vue";
+import appHome from "./pages/home/Home.vue";
 export default {
-  setup(a, b) {
-      console.log( 11232 );
-    // const { proxy } = getCurrentInstance();
-    // console.log(proxy);
-    // console.log(proxy.$fabric);
-    // return {};
+  name: "App",
+  components: {
+    "app-home": appHome,
   },
+
+  setup() {},
 };
 </script>
 
