@@ -1,22 +1,12 @@
 <template>
   <div class="home-box" :style="'height:' + bodyHeight + 'px'">
-    <BlockUI :blocked="textData.isShowInput" :fullScreen="true" :baseZIndex="90" :autoZIndex="false">
-      <div class="add-text-input-box" name="p-blockui-document" v-show="textData.isShowInput">
-        <!-- <span class="p-float-label"> -->
-        <InputText id="add-text" class="add-text-input" type="text" v-model="textData.content" />
-        <!-- <label class="add-text-tip" for="add-text">添加文本</label> -->
-        <!-- </span> -->
-        <Button class="cancel-btn" @click="switchShowText">取消</Button>
-        <Button @click="addText">确定</Button>
-      </div>
-    </BlockUI>
-
+    <!-- <img src="./bgImg2.jpg" class="canvas-img"> -->
     <!-- header -->
     <div class="header-box">
       <div class="project-name">邀请函</div>
       <div class="header-btn-list">
         <Button @click="switchShowText">文字</Button>
-        <Button @click="delText">测试删除</Button>
+        <Button @click="delText">动画</Button>
         <Button>图片</Button>
         <Button>音乐</Button>
         <Button>视频</Button>
@@ -29,58 +19,86 @@
       <div class="canvas-box">
         <canvas id="edit-canvas" :width="375 * 1.5" :height="667 * 1.5" style="border: 1px solid #00000011"></canvas>
       </div>
-      <div class="tool-right"></div>
+      <div class="tool-right">
+        <Layer :layer-list="layerList" />
+      </div>
     </div>
     <!-- footer -->
     <footer class="footer-box">Posted by: carSlow</footer>
+    <!-- 添加文字蒙层 -->
+    <BlockUI :blocked="textData.isShowInput" :fullScreen="true" :baseZIndex="90" :autoZIndex="false">
+      <div class="add-text-input-box" name="p-blockui-document" v-show="textData.isShowInput">
+        <InputText id="add-text" class="add-text-input" type="text" v-model="textData.content" />
+        <Button class="cancel-btn" @click="switchShowText">取消</Button>
+        <Button @click="addText">确定</Button>
+      </div>
+    </BlockUI>
   </div>
 </template>
 
 <script>
 import { red, reactive, onMounted, getCurrentInstance } from "vue";
+import Layer from "./Layer.vue";
 export default {
+  components: { Layer },
   setup() {
     // 获取全局属性
     const { proxy } = getCurrentInstance();
+    // 获取画布插件
     const fabric = proxy.$fabric;
+    // 定义文本相关信息
     const textData = reactive({
       isShowInput: false,
       content: "",
     });
     // 定义画布对象
     let canvasContext;
+    // 定义图层
+    let layerList = reactive([]);
 
     // 挂载后初始化画布对象
     onMounted(() => {
       canvasContext = new fabric.Canvas("edit-canvas");
-      console.log(canvasContext);
-      canvasContext.on("mouse:down", function (options, a) {
-        console.log(options);
-        console.log(a);
+      canvasContext.on("after:render", function (options) {
+        console.log( options );
+        getLayerInfo();
       });
     });
-    let text;
+    //
     // 展示或者隐藏添加文本蒙层
     function switchShowText() {
       textData.isShowInput = !textData.isShowInput;
     }
     // 添加文本
     function addText() {
-      text = new fabric.Text(textData.content, { left: 10, top: 10 });
-      canvasContext.add(text);
+      // 生成文本实例
+      const text = new fabric.Text(textData.content, { left: 10, top: 10 });
+      // 隐藏文本展示
       textData.isShowInput = false;
+      // 将输入框内容清空
       textData.content = "";
+      // 将文本实例加入到画布
+      canvasContext.add(text);
+    }
+    // 整理图层信息 （获取画布所有元素，并标识出是否被选择出来）
+    function getLayerInfo() {
+      // 清空画布对象
+      while (layerList.length > 0) {
+        layerList.pop();
+      }
+      console.log(canvasContext);
+      // 将画布对象重新加入图层
+      layerList.push(...canvasContext.getObjects());
     }
     // 删除文本
-    function delText() {
-      canvasContext.remove(text);
-    }
+    function delText() {}
     return {
       bodyHeight: window.innerHeight,
       switchShowText,
       addText,
       delText,
       textData,
+      layerList,
     };
   },
 };
@@ -90,6 +108,7 @@ export default {
 /* body */
 .home-box {
   background-color: #d6effb66;
+  overflow: hidden;
   /* min-height: 2000px; */
 }
 
@@ -126,14 +145,17 @@ export default {
 /* center */
 .center-box {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
+  padding-top: 90px;
 }
 
 .canvas-box {
   display: inline-block;
   background-color: #f4f7fb;
+}
 
-  margin-top: 40px;
+.tool-right {
+  position: relative;
 }
 
 .add-text-input-box {
