@@ -6,12 +6,12 @@
       <div class="project-name">邀请函</div>
       <div class="header-btn-list">
         <Button @click="switchShowText">文字</Button>
-        <Button @click="delText">动画</Button>
         <Button>图片</Button>
         <Button>音乐</Button>
         <Button>视频</Button>
+        <Button>动画</Button>
       </div>
-      <div class="header-share-box">分享</div>
+      <div class="header-share-box" @click="shareCanvas">分享</div>
     </div>
     <!-- center -->
     <div class="center-box">
@@ -20,7 +20,7 @@
         <canvas id="edit-canvas" :width="375 * 1.5" :height="667 * 1.5" style="border: 1px solid #00000011"></canvas>
       </div>
       <div class="tool-right">
-        <Layer :layer-list="layerList" />
+        <Layer :layer-list="layerList" @selectLayer="selectLayer" />
       </div>
     </div>
     <!-- footer -->
@@ -28,7 +28,7 @@
     <!-- 添加文字蒙层 -->
     <BlockUI :blocked="textData.isShowInput" :fullScreen="true" :baseZIndex="90" :autoZIndex="false">
       <div class="add-text-input-box" name="p-blockui-document" v-show="textData.isShowInput">
-        <InputText id="add-text" class="add-text-input" type="text" v-model="textData.content" />
+        <InputText id="add-text" class="add-text-input" type="text" v-model="textData.content" @keydown.enter="addText" />
         <Button class="cancel-btn" @click="switchShowText">取消</Button>
         <Button @click="addText">确定</Button>
       </div>
@@ -37,11 +37,21 @@
 </template>
 
 <script>
-import { red, reactive, onMounted, getCurrentInstance } from "vue";
+import {
+  ref,
+  reactive,
+  onMounted,
+  getCurrentInstance,
+  toRaw,
+  onBeforeUnmount,
+} from "vue";
+import { useRouter } from "vue-router";
 import Layer from "./Layer.vue";
 export default {
   components: { Layer },
+
   setup() {
+    const $router = useRouter();
     // 获取全局属性
     const { proxy } = getCurrentInstance();
     // 获取画布插件
@@ -55,24 +65,78 @@ export default {
     let canvasContext;
     // 定义图层
     let layerList = reactive([]);
-
     // 挂载后初始化画布对象
     onMounted(() => {
       canvasContext = new fabric.Canvas("edit-canvas");
-      canvasContext.on("after:render", function (options) {
-        console.log( options );
+      const loaclCanvas = localStorage.getItem("canvas");
+      if (loaclCanvas !== null) {
+        canvasContext.loadFromJSON(loaclCanvas);
+      }
+      // 渲染之后重新获取画布元素 todo:有性能问题、后续优化
+      canvasContext.on("after:render", function () {
+        canvasContext.getObjects().map((item) => {
+          item.toObject = (function (toObject) {
+            return function () {
+              return fabric.util.object.extend(toObject.call(this), {
+                animation: this.animation,
+              });
+            };
+          })(item.toObject);
+        });
+        localStorage.setItem("canvas", JSON.stringify(canvasContext));
+
         getLayerInfo();
       });
+      document.onkeydown = function (e) {
+        if (e.code === "Backspace" || e.code === "Delete") {
+          canvasContext.remove(...canvasContext.getActiveObjects());
+        }
+      };
+      // location.reload();
     });
-    //
+    // onBeforeUnmount(() => {
+    //   canvasContext.dispose();
+    // });
     // 展示或者隐藏添加文本蒙层
     function switchShowText() {
       textData.isShowInput = !textData.isShowInput;
+      if (textData.isShowInput) {
+        setTimeout(() => {
+          document.getElementById("add-text").focus();
+        }, 10);
+      }
     }
     // 添加文本
     function addText() {
       // 生成文本实例
       const text = new fabric.Text(textData.content, { left: 10, top: 10 });
+      text.animation = [
+        {
+          property: "angle",
+          value: "300",
+          details: {
+            duration: 4000,
+            from: 0,
+          },
+        },
+      ];
+      // console.log(text);
+      // text.on("after:render", function () {
+      //   console.log("abc");
+      // });
+      text.on("selected", function () {
+        text.animate("angle", "300", {
+          onChange: canvasContext.renderAll.bind(canvasContext),
+          duration: 4000,
+          from: 0,
+          onComplete: () => {
+            // this.set("angle", 0);
+            canvasContext.renderAll();
+          },
+        });
+      });
+      // findAnimationsByTarget （目标）→ {Array.<AnimationContext>}
+      // console.log( canvasContext.findAnimationsByTarget(text) );
       // 隐藏文本展示
       textData.isShowInput = false;
       // 将输入框内容清空
@@ -86,12 +150,26 @@ export default {
       while (layerList.length > 0) {
         layerList.pop();
       }
-      console.log(canvasContext);
+
       // 将画布对象重新加入图层
-      layerList.push(...canvasContext.getObjects());
+      layerList.push(
+        ...canvasContext.getObjects().map((item) => ({
+          isActive: canvasContext.getActiveObjects().includes(item),
+          layer: item,
+        }))
+      );
     }
     // 删除文本
     function delText() {}
+    // 选择图层
+    function selectLayer(theLayer) {
+      canvasContext.setActiveObject(toRaw(theLayer));
+      canvasContext.renderAll();
+    }
+    // 分享
+    function shareCanvas() {
+      $router.push({ path: "/invitation_letter" });
+    }
     return {
       bodyHeight: window.innerHeight,
       switchShowText,
@@ -99,6 +177,8 @@ export default {
       delText,
       textData,
       layerList,
+      selectLayer,
+      shareCanvas,
     };
   },
 };
@@ -138,8 +218,13 @@ export default {
 
 .header-share-box {
   font-size: 16px;
-  margin-right: 50px;
   color: #888ce5;
+  height: 100%;
+  width: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
 }
 
 /* center */

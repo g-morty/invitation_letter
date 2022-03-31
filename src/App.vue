@@ -1,18 +1,3 @@
 <template>
-  <app-home></app-home>
+    <router-view></router-view>
 </template>
-
-<script>
-import {} from "vue";
-import appHome from "./pages/home/Home.vue";
-export default {
-  name: "App",
-  components: {
-    "app-home": appHome,
-  },
-
-};
-</script>
-
-<style>
-</style>
