@@ -7,6 +7,8 @@ import SpeedDial from 'primevue/speeddial';
 import BlockUI from 'primevue/blockui';
 import InputText from 'primevue/inputtext';
 import Sidebar from 'primevue/sidebar';
+import Galleria from 'primevue/galleria';
+// import Editor from 'primevue/editor';
 
 export default (app) => {
     app.use(PrimeVue);
@@ -17,5 +19,7 @@ export default (app) => {
     app.component('BlockUI', BlockUI);
     app.component('InputText', InputText);
     app.component('Sidebar', Sidebar);
+    app.component('Galleria', Galleria);
+    // app.component('Editor', Editor);
 
 }

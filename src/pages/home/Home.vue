@@ -1,21 +1,20 @@
 <template>
   <div class="home-box" :style="'height:' + bodyHeight + 'px'">
-    <!-- <img src="./bgImg2.jpg" class="canvas-img"> -->
     <!-- header -->
     <div class="header-box">
       <div class="project-name">邀请函</div>
       <div class="header-btn-list">
-        <Button @click="switchShowText">文字</Button>
-        <Button>图片</Button>
-        <Button>音乐</Button>
-        <Button>视频</Button>
-        <Button>动画</Button>
+        <Button @click="addText">文字</Button>
+        <!-- <i class="iconfont icon-wenzi"></i> -->
+        <Button @click="showImgList = !showImgList">图片</Button>
       </div>
       <div class="header-share-box" @click="shareCanvas">分享</div>
     </div>
     <!-- center -->
     <div class="center-box">
-      <div class="tool-left"></div>
+      <div class="tool-left">
+        <ImageList v-show="showImgList" @chooseImg="chooseImg" />
+      </div>
       <div class="canvas-box">
         <canvas id="edit-canvas" :width="375 * 1.5" :height="667 * 1.5" style="border: 1px solid #00000011"></canvas>
       </div>
@@ -26,13 +25,17 @@
     <!-- footer -->
     <footer class="footer-box">Posted by: carSlow</footer>
     <!-- 添加文字蒙层 -->
-    <BlockUI :blocked="textData.isShowInput" :fullScreen="true" :baseZIndex="90" :autoZIndex="false">
-      <div class="add-text-input-box" name="p-blockui-document" v-show="textData.isShowInput">
-        <InputText id="add-text" class="add-text-input" type="text" v-model="textData.content" @keydown.enter="addText" />
-        <Button class="cancel-btn" @click="switchShowText">取消</Button>
-        <Button @click="addText">确定</Button>
+    <!-- <BlockUI :blocked="textData.isShowInput" :fullScreen="true" :baseZIndex="90" :autoZIndex="false">
+      <div v-show="textData.isShowInput">
+        <div class="add-text-input-box" name="p-blockui-document">
+          <InputText id="add-text" class="add-text-input" type="text" v-model="textData.content" @keydown.enter="addText" />
+          <Button class="cancel-btn" @click="switchShowText">取消</Button>
+          <Button @click="addText">确定</Button>
+        </div>
+        <div class="text-tool">
+        </div>
       </div>
-    </BlockUI>
+    </BlockUI> -->
   </div>
 </template>
 
@@ -47,10 +50,15 @@ import {
 } from "vue";
 import { useRouter } from "vue-router";
 import Layer from "./Layer.vue";
+import ImageList from "./ImageList.vue";
 export default {
-  components: { Layer },
+  components: { Layer, ImageList },
 
   setup() {
+    /**
+     * 变量
+     * */
+    // 定义路由实例
     const $router = useRouter();
     // 获取全局属性
     const { proxy } = getCurrentInstance();
@@ -59,12 +67,16 @@ export default {
     // 定义文本相关信息
     const textData = reactive({
       isShowInput: false,
-      content: "",
+      content: "文本",
     });
+    const showImgList = ref(true);
     // 定义画布对象
     let canvasContext;
     // 定义图层
     let layerList = reactive([]);
+    /**
+     * 事件
+     * */
     // 挂载后初始化画布对象
     onMounted(() => {
       canvasContext = new fabric.Canvas("edit-canvas");
@@ -84,63 +96,29 @@ export default {
           })(item.toObject);
         });
         localStorage.setItem("canvas", JSON.stringify(canvasContext));
-
         getLayerInfo();
       });
       document.onkeydown = function (e) {
-        if (e.code === "Backspace" || e.code === "Delete") {
+        if (e.code === "Delete") {
           canvasContext.remove(...canvasContext.getActiveObjects());
         }
       };
       // location.reload();
     });
-    // onBeforeUnmount(() => {
-    //   canvasContext.dispose();
-    // });
-    // 展示或者隐藏添加文本蒙层
-    function switchShowText() {
-      textData.isShowInput = !textData.isShowInput;
-      if (textData.isShowInput) {
-        setTimeout(() => {
-          document.getElementById("add-text").focus();
-        }, 10);
-      }
-    }
+
+    // // 展示或者隐藏添加文本蒙层
+    // function switchShowText() {
+    //   textData.isShowInput = !textData.isShowInput;
+    //   if (textData.isShowInput) {
+    //     setTimeout(() => {
+    //       document.getElementById("add-text").focus();
+    //     }, 10);
+    //   }
+    // }
     // 添加文本
     function addText() {
       // 生成文本实例
-      const text = new fabric.Text(textData.content, { left: 10, top: 10 });
-      text.animation = [
-        {
-          property: "angle",
-          value: "300",
-          details: {
-            duration: 4000,
-            from: 0,
-          },
-        },
-      ];
-      // console.log(text);
-      // text.on("after:render", function () {
-      //   console.log("abc");
-      // });
-      text.on("selected", function () {
-        text.animate("angle", "300", {
-          onChange: canvasContext.renderAll.bind(canvasContext),
-          duration: 4000,
-          from: 0,
-          onComplete: () => {
-            // this.set("angle", 0);
-            canvasContext.renderAll();
-          },
-        });
-      });
-      // findAnimationsByTarget （目标）→ {Array.<AnimationContext>}
-      // console.log( canvasContext.findAnimationsByTarget(text) );
-      // 隐藏文本展示
-      textData.isShowInput = false;
-      // 将输入框内容清空
-      textData.content = "";
+      const text = new fabric.IText(textData.content, { left: 240, top: 400 });
       // 将文本实例加入到画布
       canvasContext.add(text);
     }
@@ -150,7 +128,6 @@ export default {
       while (layerList.length > 0) {
         layerList.pop();
       }
-
       // 将画布对象重新加入图层
       layerList.push(
         ...canvasContext.getObjects().map((item) => ({
@@ -159,8 +136,7 @@ export default {
         }))
       );
     }
-    // 删除文本
-    function delText() {}
+
     // 选择图层
     function selectLayer(theLayer) {
       canvasContext.setActiveObject(toRaw(theLayer));
@@ -170,15 +146,35 @@ export default {
     function shareCanvas() {
       $router.push({ path: "/invitation_letter" });
     }
+    // console.log(process.env.BASE_URL);
+    function chooseImg(imgurl) {
+      var newImg = new Image();
+      newImg.src = process.env.BASE_URL + imgurl;
+      newImg.onload = function () {
+        var imgInstance = new fabric.Image(a, {
+          left: 100,
+          top: 100,
+          // scaleX: 0.2,
+          // scaleY: 0.2,
+        });
+        canvasContext.add(imgInstance);
+      };
+
+      // fabric.Image.fromURL( process.env.BASE_URL + imgurl, function (oImg) {
+      //   // oImg.set('width',100)
+      //   // oImg.set('height',100)
+      //   canvasContext.add(oImg);
+      // });
+    }
     return {
       bodyHeight: window.innerHeight,
-      switchShowText,
       addText,
-      delText,
       textData,
       layerList,
       selectLayer,
       shareCanvas,
+      showImgList,
+      chooseImg,
     };
   },
 };
@@ -194,12 +190,12 @@ export default {
 
 /* header */
 .header-box {
-  height: 80px;
+  height: 60px;
   border-bottom: 2px solid #edeff3;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #f8f8f6;
+  background-color: white;
 }
 
 .project-name {
@@ -231,7 +227,10 @@ export default {
 .center-box {
   display: flex;
   justify-content: space-between;
-  padding-top: 90px;
+}
+
+.tool-left {
+  position: relative;
 }
 
 .canvas-box {

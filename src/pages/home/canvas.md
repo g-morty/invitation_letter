@@ -56,7 +56,7 @@ rect.set('selectable', false);
 <!-- 初始化是便设置为不可选 -->
 var staticCanvas = new fabric.StaticCanvas('c'); 
 
-staticCanvas.add( 
+staticCanvas.add(
   new fabric.Rect({ 
     width: 10, height: 20, 
     left: 100, top: 100, 
@@ -167,3 +167,30 @@ canvas.getActiveObjects()返回一个数组，其中包含对当前选定对象�
 preserveObjectStacking
 
 
+// text.animation = [
+//   {
+//     property: "angle",
+//     value: "300",
+//     details: {
+//       duration: 4000,
+//       from: 0,
+//     },
+//   },
+// ];
+// console.log(text);
+// text.on("after:render", function () {
+//   console.log("abc");
+// });
+// text.on("selected", function () {
+//   text.animate("angle", "300", {
+//     onChange: canvasContext.renderAll.bind(canvasContext),
+//     duration: 4000,
+//     from: 0,
+//     onComplete: () => {
+//       // this.set("angle", 0);
+//       canvasContext.renderAll();
+//     },
+//   });
+// });
+// findAnimationsByTarget （目标）→ {Array.<AnimationContext>}
+// console.log( canvasContext.findAnimationsByTarget(text) );

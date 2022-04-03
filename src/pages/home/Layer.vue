@@ -34,7 +34,7 @@ export default {
   left: 0;
   top: 0;
   transform: translateX(-100%);
-  border: 1rpx solid red;
+  /* border: 1rpx solid red; */
   padding-top: 30px;
 }
 .show-layer-box {
