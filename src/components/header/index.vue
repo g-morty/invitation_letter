@@ -7,7 +7,7 @@
           <i class="iconfont icon-wenzi"></i>
           <div class="tool-text">文本</div>
         </div>
-        <div class="tool-item">
+        <div class="tool-item" @click="showImgMask">
           <i class="iconfont icon-tupian1"></i>
           <div class="tool-text">图片</div>
         </div>
@@ -23,8 +23,12 @@ export default {
     function addText() {
       context.emit("addText");
     }
+    function showImgMask() {
+      context.emit("showImgMask");
+    }
     return {
       addText,
+      showImgMask,
     };
   },
 };

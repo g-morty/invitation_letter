@@ -1,13 +1,13 @@
 <template>
   <div class="app-box" :style="'height:' + bodyHeight + 'px'">
-    <header-view @addText="addText" />
+    <header-view @addText="addText" @showImgMask="showImgMask" />
     <div class="app-body">
       <div class="app-left"></div>
       <div class="app-center">
         <canvas id="2edit-canvas" width="375" height="667"></canvas>
       </div>
       <div class="app-right">
-        <layer-manage :canvasList="canvasList" :canvasSelectedIndex="canvasSelectedIndex" @addNewCanvas="addNewCanvas" @changeCanvasSelectedIndex="changeCanvasSelectedIndex" @deleteCanvasByIndex="deleteCanvasByIndex" @setCanvasBgColor="setCanvasBgColor" />
+        <layer-manage :canvasList="canvasList" :canvasSelectedIndex="canvasSelectedIndex" @addNewCanvas="addNewCanvas" @changeCanvasSelectedIndex="changeCanvasSelectedIndex" @deleteCanvasByIndex="deleteCanvasByIndex" @setCanvasBgColor="setCanvasBgColor" @selectLayer="selectLayer" @switchLayerSelectable="switchLayerSelectable" @switchLayerVisible="switchLayerVisible" />
       </div>
     </div>
   </div>
@@ -54,16 +54,23 @@ export default {
       const canvasContext = new fabric.Canvas(newCanvas.id);
       // 将画布添加进入画布列表
       canvasList.push({
+        // canvas
         canvas: newCanvas,
+        // 画布id
         id: newCanvas.id,
+        // 画布控制器
         canvasContext,
+        // 画布的dom节点
         canvasNode: appCenterEle.children[0],
+        // 画布的图片
         canvasImg: canvasContext.toDataURL(),
+        // 画布的图层
+        layerList: [],
       });
       // 设置初始化背景色
       setCanvasBgColor("#ffffff");
 
-      // 鼠标移动后更新img
+      // 给画布绑定事件
       canvasBindOn(canvasContext, newCanvas.id);
       // 更新当前画布下标
       canvasSelectedIndex.value = canvasList.length - 1;
@@ -76,12 +83,39 @@ export default {
         canvasContext.remove(...canvasContext.getActiveObjects());
       }
     };
-    // 鼠标移动后更新img
+    // 给画布绑定事件
     function canvasBindOn(canvasContext, canvasId) {
       let index = getCanvasIndexById(canvasId);
       canvasContext.on("mouse:out", () => {
         updateTheCanvasImg();
       });
+      canvasContext.on("selection:created", () => {
+        // 整理图层信息 （获取画布所有元素，并标识出是否被选择出来）
+        getLayerInfo(index);
+      });
+      canvasContext.on("selection:updated", () => {
+        // 整理图层信息 （获取画布所有元素，并标识出是否被选择出来）
+        getLayerInfo(index);
+      });
+      canvasContext.on("selection:cleared", () => {
+        // 整理图层信息 （获取画布所有元素，并标识出是否被选择出来）
+        getLayerInfo(index);
+      });
+    }
+    // 整理图层信息 （获取画布所有元素，并标识出是否被选择出来）
+    function getLayerInfo(index) {
+      const canvasContext = toRaw(canvasList[index].canvasContext);
+      // 清空画布对象
+      while (canvasList[index].layerList.length > 0) {
+        canvasList[index].layerList.pop();
+      }
+      // 将画布对象重新加入图层
+      canvasList[index].layerList.push(
+        ...canvasContext.getObjects().map((item) => ({
+          isActive: canvasContext.getActiveObjects().includes(item),
+          layer: item,
+        }))
+      );
     }
     // 根据canvasId获取canvas的index
     function getCanvasIndexById(canvasId) {
@@ -161,6 +195,7 @@ export default {
       );
       // 将文本实例加入到画布
       canvasContext.add(text);
+      console.log(text);
       // 设置文本为被选中状态
       canvasContext.setActiveObject(text);
       // 设置更新画布图片
@@ -168,6 +203,27 @@ export default {
         updateTheCanvasImg();
       }, 0);
     }
+    function showImgMask() {
+      // // 生成文本实例
+      // const text = new fabric.IText("文本", {
+      //   left: 150,
+      //   top: 240,
+      //   selectable: false,
+      //   visible: false,
+      // });
+      // const canvasContext = toRaw(
+      //   canvasList[canvasSelectedIndex.value].canvasContext
+      // );
+      // // 将文本实例加入到画布
+      // canvasContext.add(text);
+      // console.log(text);
+      // canvasContext.renderAll();
+      // // 设置更新画布图片
+      // setTimeout(() => {
+      //   updateTheCanvasImg();
+      // }, 0);
+    }
+
     function setCanvasBgColor(color) {
       const canvasContext = toRaw(
         canvasList[canvasSelectedIndex.value].canvasContext
@@ -175,6 +231,41 @@ export default {
       canvasContext.backgroundColor = color;
       canvasContext.renderAll();
     }
+    // 选择图层
+    function selectLayer(theLayer) {
+      if (theLayer.selectable === false) {
+        return;
+      }
+      const canvasContext = toRaw(
+        canvasList[canvasSelectedIndex.value].canvasContext
+      );
+      canvasContext.setActiveObject(toRaw(theLayer));
+      canvasContext.renderAll();
+    }
+    // 切换是否可被选
+    function switchLayerSelectable(theLayer, value) {
+      const canvasContext = toRaw(
+        canvasList[canvasSelectedIndex.value].canvasContext
+      );
+      theLayer.set("selectable", value);
+      if (!value) {
+        canvasContext.discardActiveObject();
+      }
+      canvasContext.renderAll();
+    }
+    function switchLayerVisible(theLayer, value) {
+      console.log(theLayer);
+      console.log(value);
+      const canvasContext = toRaw(
+        canvasList[canvasSelectedIndex.value].canvasContext
+      );
+      theLayer.set("visible", value);
+      if (!value) {
+        canvasContext.discardActiveObject();
+      }
+      canvasContext.renderAll();
+    }
+
     /**
      * 返回值
      * */
@@ -187,6 +278,10 @@ export default {
       deleteCanvasByIndex,
       addText,
       setCanvasBgColor,
+      selectLayer,
+      showImgMask,
+      switchLayerSelectable,
+      switchLayerVisible,
     };
   },
 };

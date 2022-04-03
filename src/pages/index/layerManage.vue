@@ -31,19 +31,9 @@
       </div>
       <div class="layer-manage" v-show="manageIndex == 1">
         <div class="layer-list">
-          <div class="layer-item">
-            <i class="iconfont icon-kejian"></i>
-            <i class="iconfont icon-suoding"></i>
-            <div class="layer-text">新文本</div>
-          </div>
-          <div class="layer-item">
-            <i class="iconfont icon-bukejian"></i>
-            <i class="iconfont icon-jiesuo"></i>
-            <div class="layer-text">新文本</div>
-          </div>
-          <div class="layer-item" :class="{'layer-item-selected':true}">
-            <i class="iconfont icon-kejian"></i>
-            <i class="iconfont icon-suoding"></i>
+          <div class="layer-item" :class="{'layer-item-selected':item.isActive}" v-for="(item,index) in layerList" :key="index" @click="selectLayer(item)">
+            <i class="iconfont" :class="item.layer.visible === false?'icon-bukejian':'icon-kejian'" @click.stop="switchLayerVisible(item)"></i>
+            <i class="iconfont" :class="item.layer.selectable === false?'icon-jiesuo':'icon-suoding'" @click.stop="switchLayerSelectable(item)"></i>
             <div class="layer-text">新文本</div>
           </div>
         </div>
@@ -91,12 +81,17 @@
 </template>
 
 <script>
-import { ref, onMounted, toRaw, watch } from "vue";
+import { ref, onMounted, toRaw, watch, computed } from "vue";
 export default {
   props: ["canvasList", "canvasSelectedIndex"],
   setup(props, context) {
     const { canvasList, canvasSelectedIndex } = props;
     const manageIndex = ref(1);
+
+    const layerList = computed(() =>
+      canvasList.length > 0 ? canvasList[canvasSelectedIndex].layerList : []
+    );
+
     function changeManageIndex(index) {
       manageIndex.value = index;
     }
@@ -115,6 +110,27 @@ export default {
     function setCanvasBgColor(color) {
       context.emit("setCanvasBgColor", color);
     }
+    // 选择图层
+    function selectLayer(theLayer) {
+      context.emit("selectLayer", theLayer.layer);
+    }
+    // 切换--是否可以被选中
+    function switchLayerSelectable(theLayer) {
+      // console.log(!!theLayer.layer.selectable);
+      context.emit(
+        "switchLayerSelectable",
+        theLayer.layer,
+        !theLayer.layer.selectable
+      );
+    }
+    // 切换--是否可以被看见
+    function switchLayerVisible(theLayer) {
+      context.emit(
+        "switchLayerVisible",
+        theLayer.layer,
+        !theLayer.layer.visible
+      );
+    }
     return {
       manageIndex,
       changeManageIndex,
@@ -122,6 +138,10 @@ export default {
       changeCanvasSelectedIndex,
       deleteCanvasByIndex,
       setCanvasBgColor,
+      layerList,
+      selectLayer,
+      switchLayerSelectable,
+      switchLayerVisible,
     };
   },
 };
@@ -208,12 +228,16 @@ export default {
   color: #555;
 }
 .layer-item:hover .icon-kejian,
+.layer-item:hover .icon-bukejian,
 .layer-item:hover .icon-suoding,
+.layer-item:hover .icon-jiesuo,
 .layer-item:hover .layer-text {
   color: #1261ff;
 }
 .layer-item-selected .icon-kejian,
+.layer-item-selected .icon-bukejian,
 .layer-item-selected .icon-suoding,
+.layer-item-selected .icon-jiesuo,
 .layer-item-selected .layer-text {
   color: #1261ff;
 }
