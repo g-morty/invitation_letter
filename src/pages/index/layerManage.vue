@@ -67,31 +67,135 @@
         </div>
       </div>
     </div>
-    <div class="canvas-item-ele-manage">
+    <div class="canvas-item-ele-manage" v-if="showCanvasTools.isShow">
       <div class="canvas-item-manage-title">
         <div class="canvas-item-manage-text">组件设置</div>
-        <i class="iconfont icon-close2"></i>
+        <i class="iconfont icon-close2" @click="hideCanvasTools"></i>
       </div>
       <div class="canvas-item-tools">
-        <div class="canvas-item-tool-box" :class="{'canvas-item-tool-box-selected':true}">样式</div>
-        <div class="canvas-item-tool-box">动画</div>
+        <div class="canvas-item-tool-box" :class="{'canvas-item-tool-box-selected':elementToolsData.elementIndex === 0}" @click="changeElementIndex(0)">样式</div>
+        <div class="canvas-item-tool-box" :class="{'canvas-item-tool-box-selected':elementToolsData.elementIndex === 1}" @click="changeElementIndex(1)">动画</div>
+      </div>
+      <!-- 文字 -->
+      <div v-show="elementToolsData.elementIndex === 0">
+        <template v-if="showCanvasTools.content[0].layer.type === 'i-text'">
+          <!-- 文本 -->
+          <div class="canvas-text-tools">
+            <div class="canvas-text-tool-title">
+              字体
+            </div>
+            <Dropdown class="font-family" v-model="fontData.selectedCity" :options="fontData.fontFamily" optionLabel="showText" :placeholder="showCanvasTools.content[0].layer.fontFamily" @change="changeFontFamily($event,showCanvasTools.content[0].layer)" />
+          </div>
+          <!-- 字号 -->
+          <div class="text-font-size">
+            <div class="font-size-text">字号</div>
+            <div class="font-size-tools">
+              <Dropdown class="font-size-choose" v-model.number="fontData.selectedFontSize" :options="fontData.fontSize" optionLabel="showText" :placeholder="showCanvasTools.content[0].layer.fontSize + 'px'" @change="changeFontSize($event,showCanvasTools.content[0].layer)" />
+              <div class="font-size-tool-item">
+                <i class="iconfont icon-24gl-fontSizeIncrease" @click="fontSizeIncrementReduction(showCanvasTools.content[0].layer,'Increment')"></i>
+                <i class="iconfont icon-24gl-fontSizeDecrease" @click="fontSizeIncrementReduction(showCanvasTools.content[0].layer,'Reduction')"></i>
+              </div>
+            </div>
+          </div>
+          <!-- 字体颜色 -->
+          <div class="text-color">
+            <div class="text-color-text">文本颜色</div>
+            <div class="text-color-picker">
+              <ColorPicker class="color-picker" defaultColor="#333" v-model="fontData.color" @change="changeFontColor($event,showCanvasTools.content[0].layer)" />
+              <i class="iconfont icon-huihua"></i>
+            </div>
+          </div>
+        </template>
+      </div>
+      <!-- 动画 -->
+      <div v-show="elementToolsData.elementIndex === 1">
+        动画
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { ref, onMounted, toRaw, watch, computed } from "vue";
+import { ref, onMounted, toRaw, watch, computed, reactive } from "vue";
 export default {
   props: ["canvasList", "canvasSelectedIndex"],
   setup(props, context) {
-    const { canvasList, canvasSelectedIndex } = props;
+    // 画布操作台下标下标
     const manageIndex = ref(1);
-
+    // 文本
+    const fontData = reactive({
+      selectedCity: "Times New Roman",
+      fontFamily: [
+        { showText: "Times New Roma", value: "Times New Roman" },
+        { showText: "Comic Sans", value: "Comic Sans" },
+      ],
+      selectedFontSize: 16,
+      fontSize: [
+        { showText: "12px", value: 12 },
+        { showText: "13px", value: 13 },
+        { showText: "14px", value: 14 },
+        { showText: "15px", value: 15 },
+        { showText: "16px", value: 16 },
+        { showText: "17px", value: 17 },
+        { showText: "18px", value: 18 },
+        { showText: "19px", value: 19 },
+        { showText: "20px", value: 20 },
+      ],
+      color: "",
+    });
+    // 元素操作台数据
+    const elementToolsData = reactive({
+      elementIndex: 0,
+    });
     const layerList = computed(() =>
-      canvasList.length > 0 ? canvasList[canvasSelectedIndex].layerList : []
+      props.canvasList.length > 0
+        ? props.canvasList[props.canvasSelectedIndex].layerList
+        : []
     );
 
+    // 是否显示元素操作台
+    const showCanvasTools = computed({
+      get() {
+        if (props.canvasList.length <= 0) {
+          return {
+            isShow: false,
+            content: {},
+          };
+        }
+        const seletedIText = props.canvasList[
+          props.canvasSelectedIndex
+        ].layerList.filter((item) => {
+          return item.isActive;
+        });
+        if (seletedIText.length === 1) {
+          // console.log(seletedIText);
+          return {
+            isShow: true,
+            content: seletedIText,
+          };
+        } else {
+          return {
+            isShow: false,
+            content: {},
+          };
+        }
+      },
+      // set(value) {
+      //   // const canvasContext =
+      //   //   props.canvasList[props.canvasSelectedIndex].canvasContext;
+      //   console.log("234");
+      // },
+    });
+    // 隐藏元素操作台
+    function hideCanvasTools() {
+      // 取消所有元素的选择
+      const canvasContext =
+        props.canvasList[props.canvasSelectedIndex].canvasContext;
+      canvasContext.discardActiveObject();
+      canvasContext.renderAll();
+
+      //   console.log("234");
+    }
     function changeManageIndex(index) {
       manageIndex.value = index;
     }
@@ -116,7 +220,6 @@ export default {
     }
     // 切换--是否可以被选中
     function switchLayerSelectable(theLayer) {
-      // console.log(!!theLayer.layer.selectable);
       context.emit(
         "switchLayerSelectable",
         theLayer.layer,
@@ -131,6 +234,52 @@ export default {
         !theLayer.layer.visible
       );
     }
+    // 更换字体
+    function changeFontFamily(event, element) {
+      const canvasContext =
+        props.canvasList[props.canvasSelectedIndex].canvasContext;
+      const textEle = toRaw(element);
+
+      textEle.set("fontFamily", event.value.value);
+      canvasContext.renderAll();
+    }
+    // 更换字号
+    function changeFontSize(event, element) {
+      const canvasContext =
+        props.canvasList[props.canvasSelectedIndex].canvasContext;
+
+      element.set("fontSize", event.value.value);
+      canvasContext.renderAll();
+    }
+    // 字号加一、减一
+    function fontSizeIncrementReduction(element, type) {
+      const canvasContext =
+        props.canvasList[props.canvasSelectedIndex].canvasContext;
+
+      if (type === "Increment") {
+        if (element.fontSize < 20) {
+          element.set("fontSize", element.fontSize + 1);
+          canvasContext.renderAll();
+        }
+      }
+      if (type === "Reduction") {
+        if (element.fontSize > 12) {
+          element.set("fontSize", element.fontSize - 1);
+          canvasContext.renderAll();
+        }
+      }
+    }
+    // 更换文字颜色
+    function changeFontColor(event, element) {
+      const canvasContext =
+        props.canvasList[props.canvasSelectedIndex].canvasContext;
+
+      element.set("fill", "#" + event.value);
+      canvasContext.renderAll();
+    }
+    function changeElementIndex(index) {
+      elementToolsData.elementIndex = index;
+    }
     return {
       manageIndex,
       changeManageIndex,
@@ -142,6 +291,15 @@ export default {
       selectLayer,
       switchLayerSelectable,
       switchLayerVisible,
+      showCanvasTools,
+      hideCanvasTools,
+      fontData,
+      changeFontFamily,
+      changeFontSize,
+      fontSizeIncrementReduction,
+      changeFontColor,
+      elementToolsData,
+      changeElementIndex,
     };
   },
 };
@@ -382,8 +540,116 @@ export default {
   border-bottom: 2px solid #ccd5db;
   font-weight: 500;
 }
+.canvas-item-tool-box:hover {
+  color: #1261ff;
+  border-bottom: 2px solid #1261ff;
+}
 .canvas-item-tool-box-selected {
   color: #1261ff;
   border-bottom: 2px solid #1261ff;
+}
+
+.canvas-text-tools {
+  padding: 0 12px;
+}
+.canvas-text-tool-title {
+  height: 50px;
+  line-height: 50px;
+  font-size: 14px;
+}
+.font-family {
+  width: 100%;
+  height: 34px;
+  display: flex;
+  align-items: center;
+}
+::v-global(.p-dropdown-item) {
+  font-size: 14px !important ;
+  padding: 4px 10px !important;
+}
+.text-font-size,
+.text-color {
+  display: flex;
+  margin-top: 20px;
+  justify-content: space-between;
+  padding: 0 12px;
+  align-items: center;
+}
+.font-size-text {
+  font-size: 14px;
+}
+.font-size-tools {
+  width: 160px;
+  display: flex;
+  justify-content: space-between;
+}
+.font-size-choose {
+  /* flex: 3; */
+  width: 80px;
+  height: 34px;
+  align-items: center;
+  /* overflow: hiden; */
+}
+/* .font-size-tool-item {
+  flex: 1;
+} */
+::v-global(.font-size-choose .p-dropdown-trigger) {
+  width: 12px !important;
+  font-size: 10px !important;
+  padding: 0 4px !important;
+}
+::v-global(.font-size-choose .p-dropdown-trigger span) {
+  font-size: 10px;
+  margin-right: 10px;
+}
+.font-size-tool-item {
+  display: flex;
+}
+.font-size-tool-item i {
+  width: 34px;
+  height: 34px;
+  /* background-color: red; */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-weight: 700;
+  font-size: 14px;
+}
+.text-color-picker {
+  display: flex;
+  align-items: center;
+  height: 34px;
+  /* border: 1px solid #ccc; */
+  /* padding: 1px 0; */
+  border-radius: 6px;
+  overflow: hidden;
+}
+.color-picker {
+  width: 80px;
+  /* flex: 1; */
+  margin: 0;
+  padding: 0;
+}
+::v-global(.p-colorpicker-preview) {
+  width: 100% !important;
+  border-radius: 0 !important;
+  border: none !important;
+}
+.icon-huihua {
+  width: 34px;
+  height: 32px;
+  color: #999;
+  font-size: 18px;
+  text-align: center;
+  line-height: 30px;
+  background: #f5f7fb;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-left: none;
+  border-radius: 0 4px 4px 0;
+  box-sizing: border-box;
 }
 </style>

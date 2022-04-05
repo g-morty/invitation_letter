@@ -189,7 +189,13 @@ export default {
     // 添加文本
     function addText() {
       // 生成文本实例
-      const text = new fabric.IText("文本", { left: 150, top: 240 });
+      const text = new fabric.IText("I'm in Comic Sans", {
+        left: 0,
+        top: 200,
+        fontFamily: "Times New Roman",
+        fontSize: 16,
+        fill: "#333",
+      });
       const canvasContext = toRaw(
         canvasList[canvasSelectedIndex.value].canvasContext
       );
@@ -204,26 +210,9 @@ export default {
       }, 0);
     }
     function showImgMask() {
-      // // 生成文本实例
-      // const text = new fabric.IText("文本", {
-      //   left: 150,
-      //   top: 240,
-      //   selectable: false,
-      //   visible: false,
-      // });
-      // const canvasContext = toRaw(
-      //   canvasList[canvasSelectedIndex.value].canvasContext
-      // );
-      // // 将文本实例加入到画布
-      // canvasContext.add(text);
-      // console.log(text);
-      // canvasContext.renderAll();
-      // // 设置更新画布图片
-      // setTimeout(() => {
-      //   updateTheCanvasImg();
-      // }, 0);
+      window.alert("尚未实现");
     }
-
+    // 设置画布背景色
     function setCanvasBgColor(color) {
       const canvasContext = toRaw(
         canvasList[canvasSelectedIndex.value].canvasContext
@@ -253,9 +242,9 @@ export default {
       }
       canvasContext.renderAll();
     }
+
+    // 切换--是否可以被看见
     function switchLayerVisible(theLayer, value) {
-      console.log(theLayer);
-      console.log(value);
       const canvasContext = toRaw(
         canvasList[canvasSelectedIndex.value].canvasContext
       );

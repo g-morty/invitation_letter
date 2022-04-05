@@ -6,6 +6,27 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "8361787",
+      "name": "绘画",
+      "font_class": "huihua",
+      "unicode": "e6c2",
+      "unicode_decimal": 59074
+    },
+    {
+      "icon_id": "7596494",
+      "name": "24gl-fontSizeIncrease",
+      "font_class": "24gl-fontSizeIncrease",
+      "unicode": "eb04",
+      "unicode_decimal": 60164
+    },
+    {
+      "icon_id": "7596497",
+      "name": "24gl-fontSizeDecrease",
+      "font_class": "24gl-fontSizeDecrease",
+      "unicode": "eb05",
+      "unicode_decimal": 60165
+    },
+    {
       "icon_id": "900870",
       "name": "close-2",
       "font_class": "close2",
