@@ -9,6 +9,7 @@
       <div class="app-right">
         <layer-manage :canvasList="canvasList" :canvasSelectedIndex="canvasSelectedIndex" @addNewCanvas="addNewCanvas" @changeCanvasSelectedIndex="changeCanvasSelectedIndex" @deleteCanvasByIndex="deleteCanvasByIndex" @setCanvasBgColor="setCanvasBgColor" @selectLayer="selectLayer" @switchLayerSelectable="switchLayerSelectable" @switchLayerVisible="switchLayerVisible" />
       </div>
+      <img-storage @addImg="addImg" :isShowImgMask="isShowImgMask" @hideImgMask="hideImgMask" />
     </div>
   </div>
 </template>
@@ -16,6 +17,7 @@
 <script>
 import headerView from "../../components/header/index.vue";
 import layerManage from "./layerManage.vue";
+import imgStorage from "./imgStorage.vue";
 import { ref, reactive, onMounted, getCurrentInstance, toRaw } from "vue";
 import { useRouter } from "vue-router";
 
@@ -23,6 +25,7 @@ export default {
   components: {
     "header-view": headerView,
     "layer-manage": layerManage,
+    "img-storage": imgStorage,
   },
   setup(props) {
     /**
@@ -38,6 +41,8 @@ export default {
     const canvasList = reactive([]);
     // 当前选择的画布
     const canvasSelectedIndex = ref(0);
+    //
+    const isShowImgMask = ref(false);
     /**
      * 方法
      * */
@@ -209,8 +214,28 @@ export default {
         updateTheCanvasImg();
       }, 0);
     }
+    // 显示图片蒙层
     function showImgMask() {
-      window.alert("尚未实现");
+      isShowImgMask.value = true;
+    }
+    // 隐藏图片蒙层
+    function hideImgMask() {
+      isShowImgMask.value = false;
+    }
+    // 
+    function addImg(imgUrl) {
+      const canvasContext = toRaw(
+        canvasList[canvasSelectedIndex.value].canvasContext
+      );
+      fabric.Image.fromURL(imgUrl, function (oImg) {
+        console.log(oImg);
+        oImg.scaleX = 375 / oImg.width / 2;
+        oImg.scaleY = 375 / oImg.height / 2;
+        oImg.top = 100;
+        oImg.left = 94;
+        canvasContext.add(oImg);
+        hideImgMask();
+      });
     }
     // 设置画布背景色
     function setCanvasBgColor(color) {
@@ -271,6 +296,9 @@ export default {
       showImgMask,
       switchLayerSelectable,
       switchLayerVisible,
+      addImg,
+      isShowImgMask,
+      hideImgMask,
     };
   },
 };

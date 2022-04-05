@@ -10,7 +10,7 @@ import Sidebar from 'primevue/sidebar';
 import Galleria from 'primevue/galleria';
 import Dropdown from 'primevue/dropdown';
 import ColorPicker from 'primevue/colorpicker';
-// import ColorPicker from 'primevue/colorpicker';
+import FileUpload from 'primevue/fileupload';
 
 export default (app) => {
     app.use(PrimeVue);
@@ -24,5 +24,6 @@ export default (app) => {
     app.component('Galleria', Galleria);
     app.component('Dropdown', Dropdown);
     app.component('ColorPicker', ColorPicker);
+    app.component('FileUpload', FileUpload);
 
 }
