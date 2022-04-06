@@ -222,19 +222,30 @@ export default {
     function hideImgMask() {
       isShowImgMask.value = false;
     }
-    // 
+    // 增加图片
     function addImg(imgUrl) {
       const canvasContext = toRaw(
         canvasList[canvasSelectedIndex.value].canvasContext
       );
       fabric.Image.fromURL(imgUrl, function (oImg) {
-        console.log(oImg);
+        // console.log(oImg);
         oImg.scaleX = 375 / oImg.width / 2;
         oImg.scaleY = 375 / oImg.height / 2;
         oImg.top = 100;
         oImg.left = 94;
+
+        // oImg.filters.push(new fabric.Image.filters.Sepia());
+        // oImg.applyFilters();
         canvasContext.add(oImg);
+        // console.log(oImg.toDataURL());
+        // canvasContext.renderAll();
         hideImgMask();
+        // 设置文本为被选中状态
+        canvasContext.setActiveObject(oImg);
+        // 设置更新画布图片
+        setTimeout(() => {
+          updateTheCanvasImg();
+        }, 0);
       });
     }
     // 设置画布背景色
@@ -337,4 +348,5 @@ export default {
   right: 0;
   height: 100%;
 }
+/* 添加图片过滤器、添加动画、序列化、反序列化、动画 */
 </style>                       

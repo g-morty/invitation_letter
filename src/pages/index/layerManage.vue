@@ -76,7 +76,7 @@
         <div class="canvas-item-tool-box" :class="{'canvas-item-tool-box-selected':elementToolsData.elementIndex === 0}" @click="changeElementIndex(0)">样式</div>
         <div class="canvas-item-tool-box" :class="{'canvas-item-tool-box-selected':elementToolsData.elementIndex === 1}" @click="changeElementIndex(1)">动画</div>
       </div>
-      <!-- 文字 -->
+      <!-- 文字、图片 -->
       <div v-show="elementToolsData.elementIndex === 0">
         <template v-if="showCanvasTools.content[0].layer.type === 'i-text'">
           <!-- 文本 -->
@@ -103,6 +103,18 @@
             <div class="text-color-picker">
               <ColorPicker class="color-picker" defaultColor="#333" v-model="fontData.color" @change="changeFontColor($event,showCanvasTools.content[0].layer)" />
               <i class="iconfont icon-huihua"></i>
+            </div>
+          </div>
+        </template>
+
+        <template v-if="showCanvasTools.content[0].layer.type === 'image'">
+          <div class="image-tool-filter">
+            <div class="image-tool-filter-text">滤镜</div>
+            <div class="image-tool-filter-list">
+              <div class="image-tool-filter-item" :class="{'image-tool-filter-item-selected': index === showCanvasTools.imgFilterList.index}" v-for="(item, index) in showCanvasTools.imgFilterList.content" :key="index" @click="addFilterToCanvas(index)">
+                <img class="filter-item-img" :src="item.fliterImg" alt="">
+                <div class="fliter-item-text">{{item.fliterType}}</div>
+              </div>
             </div>
           </div>
         </template>
@@ -152,7 +164,17 @@ export default {
         ? props.canvasList[props.canvasSelectedIndex].layerList
         : []
     );
-
+    // 滤镜种类
+    const imgFilterList = reactive({
+      content: [
+        // {
+        //   fliterType: filterType,
+        //   fliterImg: img.toDataURL(),
+        //   filterFun: imgFilter,
+        // },
+      ],
+      index: 0,
+    });
     // 是否显示元素操作台
     const showCanvasTools = computed({
       get() {
@@ -162,16 +184,52 @@ export default {
             content: {},
           };
         }
-        const seletedIText = props.canvasList[
+        const seletedEle = props.canvasList[
           props.canvasSelectedIndex
         ].layerList.filter((item) => {
           return item.isActive;
         });
-        if (seletedIText.length === 1) {
-          // console.log(seletedIText);
+        if (seletedEle.length === 1) {
+          // console.log(seletedEle);
+          if (seletedEle[0].layer.type === "image") {
+            // 初始化滤镜
+            imgFilterList.content = [];
+            imgFilterList.index = 0;
+            addFilterToImgList(
+              imgFilterList.content,
+              seletedEle[0].layer,
+              "原色",
+              new fabric.Image.filters.BaseFilter()
+            );
+            addFilterToImgList(
+              imgFilterList.content,
+              seletedEle[0].layer,
+              "夕阳",
+              new fabric.Image.filters.Sepia()
+            );
+            addFilterToImgList(
+              imgFilterList.content,
+              seletedEle[0].layer,
+              "黑白",
+              new fabric.Image.filters.BlackWhite()
+            );
+            addFilterToImgList(
+              imgFilterList.content,
+              seletedEle[0].layer,
+              "黄昏",
+              new fabric.Image.filters.Vintage()
+            );
+            seletedEle[0].layer.filters.length = 0;
+            seletedEle[0].layer.applyFilters();
+            return {
+              isShow: true,
+              content: seletedEle,
+              imgFilterList,
+            };
+          }
           return {
             isShow: true,
-            content: seletedIText,
+            content: seletedEle,
           };
         } else {
           return {
@@ -180,12 +238,38 @@ export default {
           };
         }
       },
-      // set(value) {
-      //   // const canvasContext =
-      //   //   props.canvasList[props.canvasSelectedIndex].canvasContext;
-      //   console.log("234");
-      // },
     });
+    // 增加滤镜种类
+    function addFilterToImgList(imgList, img, filterType, imgFilter) {
+      img.filters.length = 0;
+      img.filters.push(imgFilter);
+      img.applyFilters();
+      imgList.push({
+        fliterType: filterType,
+        fliterImg: img.toDataURL(),
+        filterFun: imgFilter,
+      });
+    }
+    // 将滤镜添加至画布
+    function addFilterToCanvas(index) {
+      // 更新当前滤镜下标
+      imgFilterList.index = index;
+      // 获取要更改的图片
+      const theImg = showCanvasTools.value.content[0].layer;
+      // 获取滤镜
+      const filterFun =
+        showCanvasTools.value.imgFilterList.content[index].filterFun;
+      //清空以往滤镜
+      theImg.filters.length = 0;
+      // 将新滤镜加入至图片
+      theImg.filters.push(filterFun);
+      // 使滤镜生效
+      theImg.applyFilters();
+      // 更新画布
+      const canvasContext =
+        props.canvasList[props.canvasSelectedIndex].canvasContext;
+      canvasContext.renderAll();
+    }
     // 隐藏元素操作台
     function hideCanvasTools() {
       // 取消所有元素的选择
@@ -300,6 +384,7 @@ export default {
       changeFontColor,
       elementToolsData,
       changeElementIndex,
+      addFilterToCanvas,
     };
   },
 };
@@ -651,5 +736,49 @@ export default {
   border-left: none;
   border-radius: 0 4px 4px 0;
   box-sizing: border-box;
+}
+.image-tool-filter {
+  padding: 0 12px;
+}
+.image-tool-filter-text {
+  height: 50px;
+  line-height: 50px;
+  font-size: 14px;
+}
+.image-tool-filter-list {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.image-tool-filter-item {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+.filter-item-img {
+  width: 51px;
+  height: 51px;
+  border-radius: 4px;
+  overflow: hidden;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+}
+.image-tool-filter-item:hover .filter-item-img {
+  border: 1px solid #1261ff;
+}
+.image-tool-filter-item:hover .fliter-item-text {
+  color: #1261ff;
+}
+.image-tool-filter-item-selected .filter-item-img {
+  border: 1px solid #1261ff;
+}
+.image-tool-filter-item-selected .fliter-item-text {
+  color: #1261ff;
+}
+
+.fliter-item-text {
+  font-size: 12px;
+  margin-top: 8px;
 }
 </style>
