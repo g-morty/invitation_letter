@@ -125,10 +125,10 @@
           添加动画
         </div>
         <div class="add-animate-list-box">
-          <div class="add-animate-item" v-for="(item, index) in [{id:'12',type:'',showText:'向右移入'}]" :key="item.id">
+          <div class="add-animate-item" v-for="(item, index) in showCanvasTools.content[0].layer.animation" :key="item.id">
             <div class="add-animate-item-text">动画{{index +1}}</div>
             <div class="add-animate-item-type">{{item.showText}}</div>
-            <i class="iconfont icon-shanchu"></i>
+            <i class="iconfont icon-shanchu" @click="removeAnimation(showCanvasTools.content[0].layer,index)"></i>
           </div>
         </div>
         <!-- 动画列表 -->
@@ -138,9 +138,10 @@
             取消添加
           </div>
           <div class="animate-tools-list">
-            <div class="aniamte-tools-item">
-              <div class="animate-tools-img"></div>
-              <div class="animate-tools-text"></div>
+            <div class="aniamte-tools-item" v-for="(item) in animateList" :key="item.type" @click="bindAnimation(showCanvasTools.content[0].layer,item.type)">
+              <div class="animate-tools-img" :style="`background: url(${item.url}) ${item.left}px ${-item.top}px;`"></div>
+              <div class="animate-tools-img-hover" :style="`background: url(${item.url}) ${item.hoverLeft}px ${item.hoverTop}px;`"></div>
+              <div class="animate-tools-text">{{item.showText}}</div>
             </div>
           </div>
         </div>
@@ -150,10 +151,15 @@
 </template>
 
 <script >
-import { ref, onMounted, toRaw, watch, computed, reactive } from "vue";
+import { ref, toRaw, computed, reactive, getCurrentInstance } from "vue";
+import animation from "../../utils/animation";
 export default {
   props: ["canvasList", "canvasSelectedIndex"],
   setup(props, context) {
+    // 获取全局属性
+    const { proxy } = getCurrentInstance();
+    // 获取画布插件
+    const { $fabric: fabric, $nanoid: nanoid } = proxy;
     // 画布操作台下标下标
     const manageIndex = ref(1);
     // 文本
@@ -180,7 +186,7 @@ export default {
     // 元素操作台数据
     const elementToolsData = reactive({
       elementIndex: 1,
-      showAnimate: !false,
+      showAnimate: false,
       hideAnimate: false,
     });
     const layerList = computed(() =>
@@ -199,6 +205,54 @@ export default {
       ],
       index: 0,
     });
+    const animateList = reactive([
+      {
+        type: "fadeIn",
+        showText: "淡入",
+        left: -40 * 1,
+        top: 40 * 0,
+        hoverLeft: -40 * 1,
+        hoverTop: 40 * 11,
+        url: require("@/assets/images/anim-iconsprit.webp"),
+      },
+      {
+        type: "shiftInToRight",
+        showText: "向右移入",
+        left: -40 * 7,
+        top: 40 * 2,
+        hoverLeft: -40 * 7,
+        hoverTop: 40 * 9,
+        url: require("@/assets/images/anim-iconsprit.webp"),
+      },
+      {
+        type: "shiftInToLeft",
+        showText: "向右移入",
+        left: -40 * 6,
+        top: 40 * 3,
+        hoverLeft: -40 * 6,
+        hoverTop: 40 * 8,
+        url: require("@/assets/images/anim-iconsprit.webp"),
+      },
+       {
+        type: "shiftInToUp",
+        showText: "向上移入",
+        left: -40 * 9,
+        top: 40 * 0,
+        hoverLeft: -40 * 9,
+        hoverTop: 40 * 11,
+        url: require("@/assets/images/anim-iconsprit.webp"),
+      },
+      {
+        type: "shiftInToDown",
+        showText: "向下移入",
+        left: -40 * 6,
+        top: 40 * 1,
+        hoverLeft: -40 * 6,
+        hoverTop: 40 * 10,
+        url: require("@/assets/images/anim-iconsprit.webp"),
+      },
+    ]);
+
     // 是否显示元素操作台
     const showCanvasTools = computed({
       get() {
@@ -301,8 +355,6 @@ export default {
         props.canvasList[props.canvasSelectedIndex].canvasContext;
       canvasContext.discardActiveObject();
       canvasContext.renderAll();
-
-      //   console.log("234");
     }
     function changeManageIndex(index) {
       manageIndex.value = index;
@@ -394,6 +446,37 @@ export default {
       elementToolsData.showAnimate = flag;
       elementToolsData.hideAnimate = !flag;
     }
+    function bindAnimation(element, type) {
+      const canvasContext =
+        props.canvasList[props.canvasSelectedIndex].canvasContext;
+      // 遍历元素事件，确定元素是否已经绑定过该动画
+      if (element.animation === undefined) {
+        element.animation = [
+          {
+            id: nanoid(),
+            ...animation.enumerate(type),
+          },
+        ];
+      } else {
+        const flag = element.animation.some((item) => item.type === type);
+        if (!flag) {
+          element.animation.push({
+            id: nanoid(),
+            ...animation.enumerate(type),
+          });
+        }
+      }
+      // console.log(element);
+      // console.log(type);
+      // console.log(showCanvasTools);
+      // animation
+      animation.run(canvasContext, element, type);
+      showHideAnimate(false);
+    }
+    function removeAnimation(element, index) {
+      console.log(element, index);
+      element.animation.splice(index, 1);
+    }
     return {
       manageIndex,
       changeManageIndex,
@@ -416,6 +499,9 @@ export default {
       changeElementIndex,
       addFilterToCanvas,
       showHideAnimate,
+      animateList,
+      bindAnimation,
+      removeAnimation,
     };
   },
 };
@@ -835,13 +921,18 @@ export default {
   background-color: #f1f5f9;
   display: flex;
   align-items: center;
+  margin-bottom: 1px;
+}
+.add-animate-item:hover {
+  background-color: #e1e5e9;
 }
 .add-animate-item-text {
   margin-left: 16px;
+  font-size: 14px;
   font-weight: 600;
+  width: 60px;
 }
 .add-animate-item-type {
-  margin-left: 20px;
   width: 80px;
   height: 24px;
   background-color: white;
@@ -878,19 +969,20 @@ export default {
 .animate-list-back {
   margin: 16px;
   background-color: #1261ff;
-  height: 40px;
+  height: 36px;
   border-radius: 8px;
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 14px;
 }
 .animate-list-back i {
-  font-size: 14px;
+  font-size: 12px;
   margin-right: 8px;
 }
 .show-animate-box {
-  animation: show-animate 1s linear forwards;
+  animation: show-animate 0.5s linear forwards;
 }
 @keyframes show-animate {
   from {
@@ -909,6 +1001,42 @@ export default {
   }
 }
 .hide-animate-box {
-  animation: hide-animate 1s linear forwards;
+  animation: hide-animate 0.5s linear forwards;
+}
+.animate-tools-list {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+}
+.aniamte-tools-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 15px 0 0 28px ;
+  width: 50px;
+}
+.animate-tools-img {
+  width: 40px;
+  height: 40px;
+}
+.animate-tools-img-hover {
+  width: 40px;
+  height: 40px;
+  display: none;
+}
+.animate-tools-text {
+  font-size: 12px;
+  color: rgb(118, 131, 143);
+  margin-top: 8px;
+}
+.aniamte-tools-item:hover .animate-tools-img {
+  display: none;
+}
+.aniamte-tools-item:hover .animate-tools-img-hover {
+  display: block;
+}
+.aniamte-tools-item:hover .animate-tools-text {
+  color: #1261ff;
 }
 </style>
