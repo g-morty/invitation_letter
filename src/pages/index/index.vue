@@ -107,6 +107,7 @@ export default {
         getLayerInfo(index);
       });
     }
+    // 给整个画布的元素添加
     // 整理图层信息 （获取画布所有元素，并标识出是否被选择出来）
     function getLayerInfo(index) {
       const canvasContext = toRaw(canvasList[index].canvasContext);
@@ -191,11 +192,29 @@ export default {
         { format: "png" }
       );
     }
+    function addAnimationToEle(Ele) {
+      Ele.toObject = (function (toObject) {
+        return function () {
+          return fabric.util.object.extend(toObject.call(this), {
+            animation: this.animation,
+          });
+        };
+      })(Ele.toObject);
+      //  canvasContext.getObjects().map((item) => {
+      //   item.toObject = (function (toObject) {
+      //     return function () {
+      //       return fabric.util.object.extend(toObject.call(this), {
+      //         animation: this.animation,
+      //       });
+      //     };
+      //   })(item.toObject);
+      // });
+    }
     // 添加文本
     function addText() {
       // 生成文本实例
       const text = new fabric.IText("I'm in Comic Sans", {
-        left: 0,
+        left: 100,
         top: 200,
         fontFamily: "Times New Roman",
         fontSize: 16,
@@ -206,12 +225,20 @@ export default {
       );
       // 将文本实例加入到画布
       canvasContext.add(text);
-      console.log(text);
       // 设置文本为被选中状态
       canvasContext.setActiveObject(text);
-      // 设置更新画布图片
+      // text.animate("angle", "+=100", {
+      //   onChange: canvasContext.renderAll.bind(canvasContext),
+      // });
+      // text.animate("left", "+=100", {
+      //   onChange: canvasContext.renderAll.bind(canvasContext),
+      // });
+      // console.log(text);
+
+      // 设置更新画布图片 重写元素toObject方法
       setTimeout(() => {
         updateTheCanvasImg();
+        addAnimationToEle(text);
       }, 0);
     }
     // 显示图片蒙层
@@ -245,6 +272,7 @@ export default {
         // 设置更新画布图片
         setTimeout(() => {
           updateTheCanvasImg();
+          addAnimationToEle(oImg);
         }, 0);
       });
     }
@@ -348,5 +376,5 @@ export default {
   right: 0;
   height: 100%;
 }
-/* 添加图片过滤器、添加动画、序列化、反序列化、动画 */
+/* 添加图片过滤器、添加动画、序列化、反序列化、动画运行、音频添加 */
 </style>                       

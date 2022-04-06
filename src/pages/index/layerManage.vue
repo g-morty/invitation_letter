@@ -106,7 +106,6 @@
             </div>
           </div>
         </template>
-
         <template v-if="showCanvasTools.content[0].layer.type === 'image'">
           <div class="image-tool-filter">
             <div class="image-tool-filter-text">滤镜</div>
@@ -120,14 +119,37 @@
         </template>
       </div>
       <!-- 动画 -->
-      <div v-show="elementToolsData.elementIndex === 1">
-        动画
+      <div class="add-animate-box" v-show="elementToolsData.elementIndex === 1">
+        <div class="add-animation-btn" @click="showHideAnimate(true)">
+          <i class="iconfont icon-jiahao"></i>
+          添加动画
+        </div>
+        <div class="add-animate-list-box">
+          <div class="add-animate-item" v-for="(item, index) in [{id:'12',type:'',showText:'向右移入'}]" :key="item.id">
+            <div class="add-animate-item-text">动画{{index +1}}</div>
+            <div class="add-animate-item-type">{{item.showText}}</div>
+            <i class="iconfont icon-shanchu"></i>
+          </div>
+        </div>
+        <!-- 动画列表 -->
+        <div class="animate-list-box" :class="{'show-animate-box':elementToolsData.showAnimate ,'hide-animate-box':elementToolsData.hideAnimate }">
+          <div class="animate-list-back" @click="showHideAnimate(false)">
+            <i class="iconfont icon-arrow-left"></i>
+            取消添加
+          </div>
+          <div class="animate-tools-list">
+            <div class="aniamte-tools-item">
+              <div class="animate-tools-img"></div>
+              <div class="animate-tools-text"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
-<script>
+<script >
 import { ref, onMounted, toRaw, watch, computed, reactive } from "vue";
 export default {
   props: ["canvasList", "canvasSelectedIndex"],
@@ -157,7 +179,9 @@ export default {
     });
     // 元素操作台数据
     const elementToolsData = reactive({
-      elementIndex: 0,
+      elementIndex: 1,
+      showAnimate: !false,
+      hideAnimate: false,
     });
     const layerList = computed(() =>
       props.canvasList.length > 0
@@ -361,8 +385,14 @@ export default {
       element.set("fill", "#" + event.value);
       canvasContext.renderAll();
     }
+    // 修改元素控制台的下标
     function changeElementIndex(index) {
       elementToolsData.elementIndex = index;
+    }
+    // 显示、隐藏动画列表
+    function showHideAnimate(flag) {
+      elementToolsData.showAnimate = flag;
+      elementToolsData.hideAnimate = !flag;
     }
     return {
       manageIndex,
@@ -385,6 +415,7 @@ export default {
       elementToolsData,
       changeElementIndex,
       addFilterToCanvas,
+      showHideAnimate,
     };
   },
 };
@@ -533,7 +564,7 @@ export default {
 .abbreviate-page-item-selected {
   background-color: #f5f8fb;
 }
-.icon-shanchu {
+.abbreviate-page-btn-item .icon-shanchu {
   display: none;
 }
 .icon-shanchu-selected {
@@ -780,5 +811,104 @@ export default {
 .fliter-item-text {
   font-size: 12px;
   margin-top: 8px;
+}
+.add-animate-box {
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+}
+.add-animation-btn {
+  height: 36px;
+  background-color: #1261ff;
+  margin: 16px;
+  color: white;
+  line-height: 36px;
+  text-align: center;
+  border-radius: 8px;
+  font-size: 14px;
+}
+.add-animation-btn i {
+  font-size: 14px;
+}
+.add-animate-item {
+  height: 40px;
+  background-color: #f1f5f9;
+  display: flex;
+  align-items: center;
+}
+.add-animate-item-text {
+  margin-left: 16px;
+  font-weight: 600;
+}
+.add-animate-item-type {
+  margin-left: 20px;
+  width: 80px;
+  height: 24px;
+  background-color: white;
+  font-size: 12px;
+  border-radius: 12px;
+  line-height: 24px;
+  text-align: center;
+}
+.add-animate-item i {
+  margin-left: 60px;
+  color: #333;
+  width: 30px;
+  height: 30px;
+  border-radius: 15px;
+  background-color: transparent;
+  font-size: 14px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.add-animate-item i:hover {
+  background-color: #ed223f;
+  color: white;
+}
+.animate-list-box {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #fff;
+  transform: translateX(100%);
+}
+.animate-list-back {
+  margin: 16px;
+  background-color: #1261ff;
+  height: 40px;
+  border-radius: 8px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.animate-list-back i {
+  font-size: 14px;
+  margin-right: 8px;
+}
+.show-animate-box {
+  animation: show-animate 1s linear forwards;
+}
+@keyframes show-animate {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@keyframes hide-animate {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+.hide-animate-box {
+  animation: hide-animate 1s linear forwards;
 }
 </style>
