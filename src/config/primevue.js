@@ -11,6 +11,8 @@ import Galleria from 'primevue/galleria';
 import Dropdown from 'primevue/dropdown';
 import ColorPicker from 'primevue/colorpicker';
 import FileUpload from 'primevue/fileupload';
+import Carousel from 'primevue/carousel';
+import Paginator from 'primevue/paginator';
 
 export default (app) => {
     app.use(PrimeVue);
@@ -25,5 +27,7 @@ export default (app) => {
     app.component('Dropdown', Dropdown);
     app.component('ColorPicker', ColorPicker);
     app.component('FileUpload', FileUpload);
+    app.component('Carousel', Carousel);
+    app.component('Paginator', Paginator);
 
 }

@@ -12,23 +12,38 @@
           <div class="tool-text">图片</div>
         </div>
       </div>
-      <div class="share-box">分享</div>
+      <div class="header-btn-group">
+        <div class="save-box" @click="goInvitationLetter">预览</div>
+        <div class="save-box" @click="saveAllCanvas">保存</div>
+        <div class="share-box">分享</div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+import { useRouter } from "vue-router";
 export default {
   setup(props, context) {
+    const $router = useRouter();
+
     function addText() {
       context.emit("addText");
     }
     function showImgMask() {
       context.emit("showImgMask");
     }
+    function saveAllCanvas() {
+      context.emit("saveAllCanvas");
+    }
+    function goInvitationLetter() {
+      $router.push({ path: "/invitation_letter" });
+    }
     return {
       addText,
       showImgMask,
+      saveAllCanvas,
+      goInvitationLetter,
     };
   },
 };
@@ -44,18 +59,40 @@ export default {
   align-items: center;
   justify-content: space-between;
 }
-.share-box {
-  font-size: 14px;
-  color: #888ce5;
+.header-btn-group {
   height: 100%;
-  width: 100px;
   display: flex;
   justify-content: center;
   align-items: center;
-  cursor: pointer;
+}
+.save-box {
+  width: 38px;
+  height: 30px;
+  border: 1px solid #ccd5db;
+  font-size: 12px;
+  line-height: 28px;
+  text-align: center;
+  border-radius: 4px;
+  background-color: #fff;
+  box-sizing: border-box;
+}
+.save-box:hover {
+  background-color: #1261ff;
+  color: #fff;
+}
+.share-box {
+  width: 38px;
+  height: 30px;
+  font-size: 12px;
+  line-height: 30px;
+  text-align: center;
+  border-radius: 4px;
+  background-color: #1261ff;
+  color: #fff;
+  margin: 0 30px 0 14px;
 }
 .share-box:hover {
-  color: #1261ff;
+  background-color: #1261ffcc;
 }
 .edit-tools {
   display: flex;

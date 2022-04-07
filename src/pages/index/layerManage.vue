@@ -161,7 +161,7 @@ export default {
     // 获取画布插件
     const { $fabric: fabric, $nanoid: nanoid } = proxy;
     // 画布操作台下标下标
-    const manageIndex = ref(1);
+    const manageIndex = ref(2);
     // 文本
     const fontData = reactive({
       selectedCity: "Times New Roman",
@@ -233,7 +233,7 @@ export default {
         hoverTop: 40 * 8,
         url: require("@/assets/images/anim-iconsprit.webp"),
       },
-       {
+      {
         type: "shiftInToUp",
         showText: "向上移入",
         left: -40 * 9,
@@ -654,8 +654,9 @@ export default {
   display: none;
 }
 .icon-shanchu-selected {
-  display: inline-block;
+  display: inline-block !important;
 }
+/* .icon-shanchu-selected . */
 .abbreviate-page-index {
   width: 24px;
   height: 24px;
@@ -1013,7 +1014,7 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin: 15px 0 0 28px ;
+  margin: 15px 0 0 28px;
   width: 50px;
 }
 .animate-tools-img {

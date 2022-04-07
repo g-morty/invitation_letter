@@ -1,6 +1,6 @@
 <template>
   <div class="app-box" :style="'height:' + bodyHeight + 'px'">
-    <header-view @addText="addText" @showImgMask="showImgMask" />
+    <header-view @addText="addText" @showImgMask="showImgMask" @saveAllCanvas="saveAllCanvas" />
     <div class="app-body">
       <div class="app-left"></div>
       <div class="app-center">
@@ -47,16 +47,37 @@ export default {
      * 方法
      * */
     onMounted(() => {
-      addNewCanvas();
+      const canvasJsonList = localStorage.getItem("canvasList");
+      // 如果本地没有缓存 添加新的canvas
+      if (canvasJsonList === null) {
+        addNewCanvas();
+      } else {
+        // 如果有缓存 将缓存反序列化至画布列表
+        const canvasArr = JSON.parse(canvasJsonList);
+        console.log(canvasArr);
+        for (let i = 0; i < canvasArr.length; i++) {
+          addNewCanvas(canvasArr[i]);
+        }
+      }
     });
     // 添加新的canvas
-    function addNewCanvas() {
+    function addNewCanvas(canvasJson) {
       // 创建新的画布
       const { appCenterEle, newCanvas } = createNewCanvas();
       // 添加新的canvas进入容器
       appCenterEle.appendChild(newCanvas);
       // 定义新画布 控制器
       const canvasContext = new fabric.Canvas(newCanvas.id);
+      if (canvasJson != undefined) {
+        canvasContext.loadFromJSON(canvasJson);
+      }
+      // canvasContext.toObject = (function (toObject) {
+      //   return function () {
+      //     return fabric.util.object.extend(toObject.call(this), {
+      //       id: this.id,
+      //     });
+      //   };
+      // })(canvasContext.toObject);
       // 将画布添加进入画布列表
       canvasList.push({
         // canvas
@@ -72,13 +93,33 @@ export default {
         // 画布的图层
         layerList: [],
       });
-      // 设置初始化背景色
-      setCanvasBgColor("#ffffff");
+      if (canvasJson === undefined) {
+        // 设置初始化背景色
+        setCanvasBgColor("#ffffff");
+      }
 
       // 给画布绑定事件
       canvasBindOn(canvasContext, newCanvas.id);
       // 更新当前画布下标
       canvasSelectedIndex.value = canvasList.length - 1;
+    }
+    // 创建新的canvas
+    function createNewCanvas() {
+      // 获取容器
+      var appCenterEle = document.getElementsByClassName("app-center")[0];
+      // 清除旧的canvas
+      for (let i = 0; i < appCenterEle.children.length; i++) {
+        appCenterEle.removeChild(appCenterEle.children[i]);
+      }
+      // 定义新的canvas
+      var newCanvas = document.createElement("canvas");
+      newCanvas.id = nanoid();
+      newCanvas.width = 375;
+      newCanvas.height = 667;
+      return {
+        appCenterEle,
+        newCanvas,
+      };
     }
     document.onkeydown = function (e) {
       if (e.code === "Delete") {
@@ -145,24 +186,7 @@ export default {
       // 添加新的canvas进入容器
       appCenterEle.appendChild(canvasNode);
     }
-    // 创建新的canvas
-    function createNewCanvas() {
-      // 获取容器
-      var appCenterEle = document.getElementsByClassName("app-center")[0];
-      // 清除旧的canvas
-      for (let i = 0; i < appCenterEle.children.length; i++) {
-        appCenterEle.removeChild(appCenterEle.children[i]);
-      }
-      // 定义新的canvas
-      var newCanvas = document.createElement("canvas");
-      newCanvas.id = nanoid();
-      newCanvas.width = 375;
-      newCanvas.height = 667;
-      return {
-        appCenterEle,
-        newCanvas,
-      };
-    }
+
     // 修改当前页下标
     function changeCanvasSelectedIndex(index) {
       canvasSelectedIndex.value = index;
@@ -254,27 +278,53 @@ export default {
       const canvasContext = toRaw(
         canvasList[canvasSelectedIndex.value].canvasContext
       );
-      fabric.Image.fromURL(imgUrl, function (oImg) {
-        // console.log(oImg);
-        oImg.scaleX = 375 / oImg.width / 2;
-        oImg.scaleY = 375 / oImg.height / 2;
-        oImg.top = 100;
-        oImg.left = 94;
-
-        // oImg.filters.push(new fabric.Image.filters.Sepia());
-        // oImg.applyFilters();
-        canvasContext.add(oImg);
-        // console.log(oImg.toDataURL());
-        // canvasContext.renderAll();
+      const newImg = new Image();
+      newImg.crossOrigin = "anonymous";
+      newImg.src = imgUrl;
+      newImg.onload = () => {
+        var imgInstance = new fabric.Image(newImg, {
+          scaleX: 375 / newImg.width / 2,
+          scaleY: 375 / newImg.height / 2,
+          top: 100,
+          left: 94,
+        });
+        canvasContext.add(imgInstance);
         hideImgMask();
         // 设置文本为被选中状态
-        canvasContext.setActiveObject(oImg);
+        canvasContext.setActiveObject(imgInstance);
         // 设置更新画布图片
         setTimeout(() => {
           updateTheCanvasImg();
-          addAnimationToEle(oImg);
+          addAnimationToEle(imgInstance);
         }, 0);
-      });
+      };
+      // imgUrl =
+      //   "https://img1.baidu.com/it/u=4216761644,15569246&fm=253&fmt=auto&app=120&f=JPEG?w=500&h=500";
+
+      // fabric.Image.fromURL(
+      //   "https://img1.baidu.com/it/u=4216761644,15569246&fm=253&fmt=auto&app=120&f=JPEG?w=500&h=500",
+      //   function (oImg) {
+      //     // console.log(oImg);
+      //     oImg.scaleX = 375 / oImg.width / 2;
+      //     oImg.scaleY = 375 / oImg.height / 2;
+      //     oImg.top = 100;
+      //     oImg.left = 94;
+
+      //     // oImg.filters.push(new fabric.Image.filters.Sepia());
+      //     // oImg.applyFilters();
+      //     canvasContext.add(oImg);
+      //     // console.log(oImg.toDataURL());
+      //     // canvasContext.renderAll();
+      //     hideImgMask();
+      //     // 设置文本为被选中状态
+      //     canvasContext.setActiveObject(oImg);
+      //     // 设置更新画布图片
+      //     setTimeout(() => {
+      //       updateTheCanvasImg();
+      //       addAnimationToEle(oImg);
+      //     }, 0);
+      //   }
+      // );
     }
     // 设置画布背景色
     function setCanvasBgColor(color) {
@@ -318,7 +368,22 @@ export default {
       }
       canvasContext.renderAll();
     }
+    // 保存
+    function saveAllCanvas() {
+      const canvasJsonList = canvasList.map((canvasItem) => {
+        const canvasContext = toRaw(canvasItem.canvasContext);
+        return canvasContext.toObject();
+        // return canvasContext.toSVG();
+      });
+      console.log(canvasJsonList);
 
+      const canvasStr = JSON.stringify(canvasJsonList);
+      localStorage.setItem("canvasList", canvasStr);
+      setTimeout(() => {
+        alert("保存成功");
+      }, 0);
+      return canvasStr;
+    }
     /**
      * 返回值
      * */
@@ -338,6 +403,7 @@ export default {
       addImg,
       isShowImgMask,
       hideImgMask,
+      saveAllCanvas,
     };
   },
 };
@@ -377,4 +443,6 @@ export default {
   height: 100%;
 }
 /* 添加图片过滤器、添加动画、序列化、反序列化、动画运行、音频添加 */
+/* 问题：网络图片报错 https://blog.csdn.net/weixin_30668887/article/details/98822699 */
+/* 三个接口：上传图片、上传序列化画布数据、下载序列化画布数据 */
 </style>                       

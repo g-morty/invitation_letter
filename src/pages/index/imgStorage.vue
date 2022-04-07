@@ -9,9 +9,9 @@
           </div>
         </div>
 
-        <div class="up-local-img">
+        <!-- <div class="up-local-img">
           <FileUpload mode="basic" auto accept="image/*" :customUpload="true" @uploader="chooseImage" chooseLabel="选择图片" />
-        </div>
+        </div> -->
       </div>
       <div class="img-list-right">
         <div class="img-type-list">

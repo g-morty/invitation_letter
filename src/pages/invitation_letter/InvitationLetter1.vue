@@ -1,7 +1,6 @@
 <template>
   <div class="show-canvas-box">
     <canvas id="show-canvas" :width="375 * 1.5" :height="667 * 1.5" style="border: 1px solid #00000011"></canvas>
-
   </div>
 </template>
 
@@ -29,8 +28,6 @@ export default {
       canvasContext = new fabric.StaticCanvas("show-canvas");
       canvasContext.loadFromJSON(loaclCanvas);
       canvasContext.getObjects().map((item) => {
-        console.log(item);
-        console.log(item.a);
         if (item.animation != undefined) {
           item.animate(
             item.animation[0]["property"],
@@ -42,10 +39,6 @@ export default {
           );
         }
       });
-      // canvasContext.on("after:render", function () {
-      //   console.log( '234' );
-
-      // });
     });
   },
 };
