@@ -15,6 +15,7 @@
 
 <script>
 import { ref, reactive, onMounted, getCurrentInstance, toRaw } from "vue";
+import animation from "../../utils/animation";
 
 export default {
   setup() {
@@ -90,7 +91,41 @@ export default {
       const canvasContext = toRaw(
         canvasList[canvasIndexOffset.value].canvasContext
       );
-      console.log( canvasContext.getObjects() );
+      const elementList = canvasContext.getObjects();
+      // console.log( elementList );
+      elementList.map((item, index) => {
+        if (item.animation != undefined) {
+          elementAnimationRun(canvasContext, item, item.animation);
+          // elementAnimationRun(canvasContext, item, item.animation[0].type);
+          // animation.run(canvasContext, item, item.animation[0].type);
+          // function run(canvasContext, element, type, cb = () => { }) {
+        }
+      });
+    }
+    // 执行动画递归
+    function elementAnimationRun(
+      canvasContext,
+      element,
+      animationList,
+      index = 0
+    ) {
+      console.log(canvasContext, element, animationList, index);
+      if (index >= animationList.length - 1) {
+        return animation.run(canvasContext, element, animationList[index].type);
+      } else {
+        return animation.run(
+          canvasContext,
+          element,
+          animationList[index].type,
+          elementAnimationRun.bind(
+            this,
+            canvasContext,
+            element,
+            animationList,
+            index + 1
+          )
+        );
+      }
     }
 
     return {
@@ -129,7 +164,7 @@ export default {
   left: 0;
   height: 100%;
   display: flex;
-  transition-duration: 1s;
+  transition-duration: 0.3s;
   transition-timing-function: linear;
 }
 .canvas-item {

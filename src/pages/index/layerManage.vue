@@ -446,9 +446,11 @@ export default {
       elementToolsData.showAnimate = flag;
       elementToolsData.hideAnimate = !flag;
     }
+    // 绑定动画
     function bindAnimation(element, type) {
-      const canvasContext =
-        props.canvasList[props.canvasSelectedIndex].canvasContext;
+      const canvasContext = toRaw(
+        props.canvasList[props.canvasSelectedIndex].canvasContext
+      );
       // 遍历元素事件，确定元素是否已经绑定过该动画
       if (element.animation === undefined) {
         element.animation = [
@@ -472,6 +474,7 @@ export default {
       // animation
       animation.run(canvasContext, element, type);
       showHideAnimate(false);
+      // console.log(canvasContext.toObject());
     }
     function removeAnimation(element, index) {
       console.log(element, index);

@@ -54,7 +54,7 @@ export default {
       } else {
         // 如果有缓存 将缓存反序列化至画布列表
         const canvasArr = JSON.parse(canvasJsonList);
-        console.log(canvasArr);
+        // console.log(canvasArr);
         for (let i = 0; i < canvasArr.length; i++) {
           addNewCanvas(canvasArr[i]);
         }
@@ -62,6 +62,7 @@ export default {
     });
     // 添加新的canvas
     function addNewCanvas(canvasJson) {
+      // console.log( canvasList );
       // 创建新的画布
       const { appCenterEle, newCanvas } = createNewCanvas();
       // 添加新的canvas进入容器
@@ -69,7 +70,7 @@ export default {
       // 定义新画布 控制器
       const canvasContext = new fabric.Canvas(newCanvas.id);
       if (canvasJson != undefined) {
-        canvasContext.loadFromJSON(canvasJson);
+        canvasLoadFromJson(canvasContext, canvasJson);
       }
       // canvasContext.toObject = (function (toObject) {
       //   return function () {
@@ -102,6 +103,11 @@ export default {
       canvasBindOn(canvasContext, newCanvas.id);
       // 更新当前画布下标
       canvasSelectedIndex.value = canvasList.length - 1;
+    }
+    // 将json添加至画布（给画布的每个元素重写toObject方法）
+    function canvasLoadFromJson(canvasContext, canvasJson) {
+      canvasContext.loadFromJSON(canvasJson);
+      canvasContext.getObjects().map((item) => addAnimationToEle(item));
     }
     // 创建新的canvas
     function createNewCanvas() {
@@ -372,6 +378,7 @@ export default {
     function saveAllCanvas() {
       const canvasJsonList = canvasList.map((canvasItem) => {
         const canvasContext = toRaw(canvasItem.canvasContext);
+        // return JSON.stringify(canvasContext)
         return canvasContext.toObject();
         // return canvasContext.toSVG();
       });

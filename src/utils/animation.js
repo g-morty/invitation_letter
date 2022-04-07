@@ -1,5 +1,5 @@
 
-function run (canvasContext,element,type) {
+function run(canvasContext, element, type, cb = () => { }) {
   const fun = {
     fadeIn,
     shiftInToRight,
@@ -7,7 +7,7 @@ function run (canvasContext,element,type) {
     shiftInToUp,
     shiftInToDown
   }
-  fun[type](canvasContext, element);
+  fun[type](canvasContext, element, cb);
 }
 function enumerate(type) {
   const animateEnum = {
@@ -19,7 +19,7 @@ function enumerate(type) {
       type,
       showText: '向右移入'
     },
-    shiftInToLeft:{
+    shiftInToLeft: {
       type,
       showText: '向左移入'
     },
@@ -35,43 +35,44 @@ function enumerate(type) {
   return animateEnum[type]
 }
 
-function fadeIn(canvasContext, element) {
-  element.animate('opacity',1,{
+function fadeIn(canvasContext, element, cb) {
+  element.animate('opacity', 1, {
     from: 0,
     duration: 1000,
     onChange: canvasContext.renderAll.bind(canvasContext),
+    onComplete: cb
   })
 }
-function shiftInToRight(canvasContext, element) {
-  console.log(element);
+function shiftInToRight(canvasContext, element, cb) {
   element.animate('left', element.left, {
     from: element.left - 100,
     duration: 1000,
     onChange: canvasContext.renderAll.bind(canvasContext),
+    onComplete: cb,
   })
 }
-function shiftInToLeft(canvasContext, element) {
-  console.log(element);
+function shiftInToLeft(canvasContext, element, cb) {
   element.animate('left', element.left, {
     from: element.left + 100,
     duration: 1000,
     onChange: canvasContext.renderAll.bind(canvasContext),
+    onComplete: cb,
   })
 }
-function shiftInToUp(canvasContext, element) {
-  console.log(element);
+function shiftInToUp(canvasContext, element, cb) {
   element.animate('top', element.top, {
     from: element.top + 100,
     duration: 1000,
     onChange: canvasContext.renderAll.bind(canvasContext),
+    onComplete: cb,
   })
 }
-function shiftInToDown(canvasContext, element) {
-  console.log(element);
+function shiftInToDown(canvasContext, element, cb) {
   element.animate('top', element.top, {
     from: element.top - 100,
     duration: 1000,
     onChange: canvasContext.renderAll.bind(canvasContext),
+    onComplete: cb,
   })
 }
 
