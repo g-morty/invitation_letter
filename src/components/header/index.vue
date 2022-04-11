@@ -11,6 +11,10 @@
           <i class="iconfont icon-tupian1"></i>
           <div class="tool-text">图片</div>
         </div>
+        <div class="tool-item" @click="showAudioMask">
+          <i class="iconfont icon-yinleyinpin"></i>
+          <div class="tool-text">音乐</div>
+        </div>
       </div>
       <div class="header-btn-group">
         <div class="save-box" @click="goInvitationLetter">预览</div>
@@ -33,6 +37,9 @@ export default {
     function showImgMask() {
       context.emit("showImgMask");
     }
+    function showAudioMask() {
+      context.emit("showAudioMask");
+    }
     function saveAllCanvas() {
       context.emit("saveAllCanvas");
     }
@@ -44,6 +51,7 @@ export default {
       showImgMask,
       saveAllCanvas,
       goInvitationLetter,
+      showAudioMask
     };
   },
 };

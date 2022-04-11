@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 3299103 */
-  src: url('iconfont.woff2?t=1649226765724') format('woff2'),
-       url('iconfont.woff?t=1649226765724') format('woff'),
-       url('iconfont.ttf?t=1649226765724') format('truetype');
+  src: url('iconfont.woff2?t=1649413041030') format('woff2'),
+       url('iconfont.woff?t=1649413041030') format('woff'),
+       url('iconfont.ttf?t=1649413041030') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,42 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-bofang1:before {
+  content: "\e62c";
+}
+
+.icon-bofang2:before {
+  content: "\e731";
+}
+
+.icon-24gl-pauseCircle:before {
+  content: "\ea6d";
+}
+
+.icon-zanting2:before {
+  content: "\e604";
+}
+
+.icon-zanting3:before {
+  content: "\e617";
+}
+
+.icon-zanting:before {
+  content: "\e629";
+}
+
+.icon-24gl-playCircle:before {
+  content: "\ea6e";
+}
+
+.icon-bofang:before {
+  content: "\e8a3";
+}
+
+.icon-yinleyinpin:before {
+  content: "\e6e5";
 }
 
 .icon-arrow-left:before {

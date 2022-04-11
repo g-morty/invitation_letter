@@ -38,6 +38,25 @@ export default {
       canvasListObject.map((item) => addNewCanvas(item));
       // 触发画布动画
       emitCanvasAnimation();
+      // 获取音频信息
+      const loaclAudioStr = localStorage.getItem("audioData");
+      console.log(loaclAudioStr);
+      if (loaclAudioStr != null) {
+        const loaclAudio = JSON.parse(loaclAudioStr);
+        console.log(loaclAudio.audioUrl);
+        const audioController = new Audio(loaclAudio.audioUrl);
+        audioController.autoplay = true;
+        // audioController.muted = true;
+        console.log(audioController);
+
+        // audioController.play();
+        var appCenterEle =
+          document.getElementsByClassName("canvas-list-box")[0];
+        appCenterEle.appendChild(audioController);
+        // setTimeout(() => {
+        audioController.play();
+        // }, 1000);
+      }
     });
 
     // 添加新的canvas

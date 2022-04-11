@@ -1,6 +1,6 @@
 <template>
   <div class="app-box" :style="'height:' + bodyHeight + 'px'">
-    <header-view @addText="addText" @showImgMask="showImgMask" @saveAllCanvas="saveAllCanvas" />
+    <header-view @addText="addText" @showImgMask="showImgMask" @saveAllCanvas="saveAllCanvas" @showAudioMask="showAudioMask" @hideAudioMask="hideAudioMask" />
     <div class="app-body">
       <div class="app-left"></div>
       <div class="app-center">
@@ -10,6 +10,7 @@
         <layer-manage :canvasList="canvasList" :canvasSelectedIndex="canvasSelectedIndex" @addNewCanvas="addNewCanvas" @changeCanvasSelectedIndex="changeCanvasSelectedIndex" @deleteCanvasByIndex="deleteCanvasByIndex" @setCanvasBgColor="setCanvasBgColor" @selectLayer="selectLayer" @switchLayerSelectable="switchLayerSelectable" @switchLayerVisible="switchLayerVisible" />
       </div>
       <img-storage @addImg="addImg" :isShowImgMask="isShowImgMask" @hideImgMask="hideImgMask" />
+      <audio-storage @addAudio="addAudio" :isShowImgMask="isShowAudioMask" @hideAudioMask="hideAudioMask"></audio-storage>
     </div>
   </div>
 </template>
@@ -18,6 +19,7 @@
 import headerView from "../../components/header/index.vue";
 import layerManage from "./layerManage.vue";
 import imgStorage from "./imgStorage.vue";
+import audioStorage from "./audioStorage.vue";
 import { ref, reactive, onMounted, getCurrentInstance, toRaw } from "vue";
 import { useRouter } from "vue-router";
 
@@ -26,6 +28,7 @@ export default {
     "header-view": headerView,
     "layer-manage": layerManage,
     "img-storage": imgStorage,
+    "audio-storage": audioStorage,
   },
   setup(props) {
     /**
@@ -43,6 +46,7 @@ export default {
     const canvasSelectedIndex = ref(0);
     //
     const isShowImgMask = ref(false);
+    const isShowAudioMask = ref(false);
     /**
      * 方法
      * */
@@ -279,6 +283,18 @@ export default {
     function hideImgMask() {
       isShowImgMask.value = false;
     }
+
+    // 显示图片蒙层
+    function showAudioMask() {
+      isShowAudioMask.value = true;
+    }
+    // 隐藏图片蒙层
+    function hideAudioMask() {
+      isShowAudioMask.value = false;
+    }
+    function addAudio(audioUrl) {
+      console.log(audioUrl);
+    }
     // 增加图片
     function addImg(imgUrl) {
       const canvasContext = toRaw(
@@ -411,6 +427,10 @@ export default {
       isShowImgMask,
       hideImgMask,
       saveAllCanvas,
+      showAudioMask,
+      hideAudioMask,
+      isShowAudioMask,
+      addAudio,
     };
   },
 };
