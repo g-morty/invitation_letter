@@ -5,7 +5,8 @@ function run(canvasContext, element, type, cb = () => { }) {
     shiftInToRight,
     shiftInToLeft,
     shiftInToUp,
-    shiftInToDown
+    shiftInToDown,
+    turnIn
   }
   fun[type](canvasContext, element, cb);
 }
@@ -30,9 +31,57 @@ function enumerate(type) {
     shiftInToDown: {
       type,
       showText: '向下移入'
+    },
+    turnIn: {
+      type,
+      showText: '翻转进入'
     }
   }
   return animateEnum[type]
+}
+function turnIn(canvasContext, element, cb) {
+
+  const newLeft = element.left + element.width * element.scaleX / 2;
+  const newTop = element.top + element.height * element.scaleY / 2;
+  const left = element.left ;
+  const top = element.top ;
+  element.set({
+    originX: 'center',
+    originY: 'center',
+    top:newTop,
+    left: newLeft,
+  });
+  // element.animate('angle', 360, {
+  //   from: 0,
+  //   duration: 1000,
+  //   onChange: canvasContext.renderAll.bind(canvasContext),
+  //   onComplete: ()=>{
+      
+  //     element.set({
+  //       top,
+  //       left,
+  //     });
+  //   }
+  // });
+ 
+  element.animate('scaleX', element.scaleX, {
+    from: -element.scaleX,
+    duration: 1000,
+  });
+  element.animate('opacity', 1, {
+    from: 0,
+    duration: 1000,
+    onChange: canvasContext.renderAll.bind(canvasContext),
+    onComplete: ()=>{
+      element.set({
+        originX: 'left',
+        originY: 'top',
+        top,
+        left,
+      });
+      cb()
+    }
+  })
 }
 
 function fadeIn(canvasContext, element, cb) {

@@ -105,16 +105,27 @@
               <i class="iconfont icon-huihua"></i>
             </div>
           </div>
+          <!-- 移除功能 -->
+          <div class="text-control" @click="removeEle(showCanvasTools.content[0].layer)">
+            <div class="text-control-text">移除</div>
+            <i class="iconfont icon-arrow-right-bold"></i>
+          </div>
         </template>
         <template v-if="showCanvasTools.content[0].layer.type === 'image'">
+          <!-- 滤镜 -->
           <div class="image-tool-filter">
             <div class="image-tool-filter-text">滤镜</div>
             <div class="image-tool-filter-list">
-              <div class="image-tool-filter-item" :class="{'image-tool-filter-item-selected': index === showCanvasTools.imgFilterList.index}" v-for="(item, index) in showCanvasTools.imgFilterList.content" :key="index" @click="addFilterToCanvas(index)">
+              <div class="image-tool-filter-item" :class="{'image-tool-filter-item-selected': index === item.index}" v-for="(item, index) in showCanvasTools.content[0].layer.imgList.content" :key="index" @click="addFilterToCanvas(index)">
                 <img class="filter-item-img" :src="item.fliterImg" alt="">
                 <div class="fliter-item-text">{{item.fliterType}}</div>
               </div>
             </div>
+          </div>
+          <!-- 移除功能 -->
+          <div class="text-control" @click="removeEle(showCanvasTools.content[0].layer)">
+            <div class="text-control-text">移除</div>
+            <i class="iconfont icon-arrow-right-bold"></i>
           </div>
         </template>
       </div>
@@ -185,7 +196,7 @@ export default {
     });
     // 元素操作台数据
     const elementToolsData = reactive({
-      elementIndex: 1,
+      elementIndex: 0,
       showAnimate: false,
       hideAnimate: false,
     });
@@ -194,17 +205,7 @@ export default {
         ? props.canvasList[props.canvasSelectedIndex].layerList
         : []
     );
-    // 滤镜种类
-    const imgFilterList = reactive({
-      content: [
-        // {
-        //   fliterType: filterType,
-        //   fliterImg: img.toDataURL(),
-        //   filterFun: imgFilter,
-        // },
-      ],
-      index: 0,
-    });
+
     const animateList = reactive([
       {
         type: "fadeIn",
@@ -251,11 +252,21 @@ export default {
         hoverTop: 40 * 10,
         url: require("@/assets/images/anim-iconsprit.webp"),
       },
+      {
+        type: "turnIn",
+        showText: "翻转进入",
+        left: -40 * 1,
+        top: 40 * 7,
+        hoverLeft: -40 * 1,
+        hoverTop: 40 * 4,
+        url: require("@/assets/images/anim-iconsprit.webp"),
+      },
     ]);
 
     // 是否显示元素操作台
     const showCanvasTools = computed({
       get() {
+        // 防止没有传递数据过来
         if (props.canvasList.length <= 0) {
           return {
             isShow: false,
@@ -267,80 +278,27 @@ export default {
         ].layerList.filter((item) => {
           return item.isActive;
         });
-        if (seletedEle.length === 1) {
-          // console.log(seletedEle);
-          if (seletedEle[0].layer.type === "image") {
-            // 初始化滤镜
-            imgFilterList.content = [];
-            imgFilterList.index = 0;
-            addFilterToImgList(
-              imgFilterList.content,
-              seletedEle[0].layer,
-              "原色",
-              new fabric.Image.filters.BaseFilter()
-            );
-            addFilterToImgList(
-              imgFilterList.content,
-              seletedEle[0].layer,
-              "夕阳",
-              new fabric.Image.filters.Sepia()
-            );
-            addFilterToImgList(
-              imgFilterList.content,
-              seletedEle[0].layer,
-              "黑白",
-              new fabric.Image.filters.BlackWhite()
-            );
-            addFilterToImgList(
-              imgFilterList.content,
-              seletedEle[0].layer,
-              "黄昏",
-              new fabric.Image.filters.Vintage()
-            );
-            seletedEle[0].layer.filters.length = 0;
-            seletedEle[0].layer.applyFilters();
-            return {
-              isShow: true,
-              content: seletedEle,
-              imgFilterList,
-            };
-          }
-          return {
-            isShow: true,
-            content: seletedEle,
-          };
-        } else {
-          return {
-            isShow: false,
-            content: {},
-          };
-        }
+        return {
+          isShow: seletedEle.length === 1,
+          content: seletedEle,
+        };
       },
     });
-    // 增加滤镜种类
-    function addFilterToImgList(imgList, img, filterType, imgFilter) {
-      img.filters.length = 0;
-      img.filters.push(imgFilter);
-      img.applyFilters();
-      imgList.push({
-        fliterType: filterType,
-        fliterImg: img.toDataURL(),
-        filterFun: imgFilter,
-      });
-    }
+
     // 将滤镜添加至画布
     function addFilterToCanvas(index) {
-      // 更新当前滤镜下标
-      imgFilterList.index = index;
       // 获取要更改的图片
       const theImg = showCanvasTools.value.content[0].layer;
+      console.log(theImg);
+      
+      // 更新当前滤镜下标
+      theImg.imgList.index = index;
       // 获取滤镜
-      const filterFun =
-        showCanvasTools.value.imgFilterList.content[index].filterFun;
+      const filterFun = theImg.imgList.content[index].filterFun;
       //清空以往滤镜
       theImg.filters.length = 0;
       // 将新滤镜加入至图片
-      theImg.filters.push(filterFun);
+      theImg.filters.push(new fabric.Image.filters[filterFun.type]());
       // 使滤镜生效
       theImg.applyFilters();
       // 更新画布
@@ -480,6 +438,12 @@ export default {
       console.log(element, index);
       element.animation.splice(index, 1);
     }
+    function removeEle(element) {
+      const canvasContext =
+        props.canvasList[props.canvasSelectedIndex].canvasContext;
+
+      canvasContext.remove(element);
+    }
     return {
       manageIndex,
       changeManageIndex,
@@ -505,6 +469,7 @@ export default {
       animateList,
       bindAnimation,
       removeAnimation,
+      removeEle,
     };
   },
 };
@@ -781,6 +746,7 @@ export default {
   padding: 0 12px;
   align-items: center;
 }
+
 .font-size-text {
   font-size: 14px;
 }
@@ -1042,5 +1008,33 @@ export default {
 }
 .aniamte-tools-item:hover .animate-tools-text {
   color: #1261ff;
+}
+.text-control {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 40px;
+  margin-top: 24px;
+  background-color: #f1f5f999;
+}
+.text-color-text {
+  font-size: 14px;
+}
+.text-control:hover {
+  background-color: #1261ff;
+}
+.text-control-text {
+  margin-left: 20px;
+  color: #333;
+  font-size: 14px;
+}
+.text-control:hover .text-control-text {
+  color: white;
+}
+.text-control i {
+  margin-right: 20px;
+}
+.text-control:hover i {
+  color: white;
 }
 </style>

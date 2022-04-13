@@ -9,6 +9,7 @@
       <div class="the-paginator">
         <Paginator v-model:first="canvasIndexOffset" @page="changCanvasInde" :rows="1" :totalRecords="canvasList.length" :pageLinkSize="3"></Paginator>
       </div>
+      <audio id="audio-ele" :muted="false">a</audio>
     </div>
   </div>
 </template>
@@ -37,26 +38,22 @@ export default {
       // 将画布信息添加至画布列表
       canvasListObject.map((item) => addNewCanvas(item));
       // 触发画布动画
-      emitCanvasAnimation();
-      // 获取音频信息
-      const loaclAudioStr = localStorage.getItem("audioData");
-      console.log(loaclAudioStr);
-      if (loaclAudioStr != null) {
-        const loaclAudio = JSON.parse(loaclAudioStr);
-        console.log(loaclAudio.audioUrl);
-        const audioController = new Audio(loaclAudio.audioUrl);
-        audioController.autoplay = true;
-        // audioController.muted = true;
-        console.log(audioController);
-
-        // audioController.play();
-        var appCenterEle =
-          document.getElementsByClassName("canvas-list-box")[0];
-        appCenterEle.appendChild(audioController);
-        // setTimeout(() => {
-        audioController.play();
-        // }, 1000);
-      }
+      setTimeout(() => {
+        emitCanvasAnimation();
+      }, 200);
+      // // 获取音频信息
+      // const loaclAudioStr = localStorage.getItem("audioData");
+      // if (loaclAudioStr != null) {
+      //   const loaclAudio = JSON.parse(loaclAudioStr);
+      //   console.log(loaclAudio.audioUrl);
+      //   const audioController = document.getElementById("audio-ele");
+      //   audioController.autoplay = true;
+      //   audioController.muted = true;
+      //   console.log(audioController);
+      //   // setTimeout(() => {
+      //   audioController.play();
+      //   // }, 1000);
+      // }
     });
 
     // 添加新的canvas
@@ -68,7 +65,7 @@ export default {
       // 定义新画布 控制器
       const canvasContext = new fabric.StaticCanvas(newCanvas.id);
       canvasContext.loadFromJSON(canvasJson);
-
+   
       // 将画布添加进入画布列表
       canvasList.push({
         // canvas

@@ -46,50 +46,7 @@ export default {
         id: nanoid(),
         url: require("@/assets/audio/abc.mp3"),
       },
-      {
-        id: nanoid(),
-        url: require("@/assets/audio/abc.mp3"),
-      },
-      {
-        id: nanoid(),
-        url: require("@/assets/audio/abc.mp3"),
-      },
-      {
-        id: nanoid(),
-        url: require("@/assets/audio/abc.mp3"),
-      },
-      {
-        id: nanoid(),
-        url: require("@/assets/audio/abc.mp3"),
-      },
-      {
-        id: nanoid(),
-        url: require("@/assets/audio/abc.mp3"),
-      },
-      {
-        id: nanoid(),
-        url: require("@/assets/audio/abc.mp3"),
-      },
-      {
-        id: nanoid(),
-        url: require("@/assets/audio/abc.mp3"),
-      },
-      {
-        id: nanoid(),
-        url: require("@/assets/audio/abc.mp3"),
-      },
-      {
-        id: nanoid(),
-        url: require("@/assets/audio/abc.mp3"),
-      },
-      {
-        id: nanoid(),
-        url: require("@/assets/audio/abc.mp3"),
-      },
-      {
-        id: nanoid(),
-        url: require("@/assets/audio/abc.mp3"),
-      },
+     
     ]);
     const audioChoose = reactive({
       isDisplay: false,

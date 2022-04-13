@@ -6,18 +6,11 @@
   "description": "",
   "glyphs": [
     {
-      "icon_id": "383677",
-      "name": "播放",
-      "font_class": "bofang1",
-      "unicode": "e62c",
-      "unicode_decimal": 58924
-    },
-    {
-      "icon_id": "5405551",
-      "name": "播放",
-      "font_class": "bofang2",
-      "unicode": "e731",
-      "unicode_decimal": 59185
+      "icon_id": "15838566",
+      "name": "arrow-right-bold",
+      "font_class": "arrow-right-bold",
+      "unicode": "e687",
+      "unicode_decimal": 59015
     },
     {
       "icon_id": "7594046",
@@ -25,27 +18,6 @@
       "font_class": "24gl-pauseCircle",
       "unicode": "ea6d",
       "unicode_decimal": 60013
-    },
-    {
-      "icon_id": "11463945",
-      "name": "暂停",
-      "font_class": "zanting2",
-      "unicode": "e604",
-      "unicode_decimal": 58884
-    },
-    {
-      "icon_id": "12320833",
-      "name": "暂停",
-      "font_class": "zanting3",
-      "unicode": "e617",
-      "unicode_decimal": 58903
-    },
-    {
-      "icon_id": "2674483",
-      "name": "暂停",
-      "font_class": "zanting",
-      "unicode": "e629",
-      "unicode_decimal": 58921
     },
     {
       "icon_id": "7594051",

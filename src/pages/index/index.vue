@@ -73,8 +73,10 @@ export default {
       appCenterEle.appendChild(newCanvas);
       // 定义新画布 控制器
       const canvasContext = new fabric.Canvas(newCanvas.id);
+      // let canvasImg = canvasContext.toDataURL();
       if (canvasJson != undefined) {
         canvasLoadFromJson(canvasContext, canvasJson);
+        // updateTheCanvasImg();
       }
       // canvasContext.toObject = (function (toObject) {
       //   return function () {
@@ -84,34 +86,37 @@ export default {
       //   };
       // })(canvasContext.toObject);
       // 将画布添加进入画布列表
-      canvasList.push({
-        // canvas
-        canvas: newCanvas,
-        // 画布id
-        id: newCanvas.id,
-        // 画布控制器
-        canvasContext,
-        // 画布的dom节点
-        canvasNode: appCenterEle.children[0],
-        // 画布的图片
-        canvasImg: canvasContext.toDataURL(),
-        // 画布的图层
-        layerList: [],
-      });
-      if (canvasJson === undefined) {
-        // 设置初始化背景色
-        setCanvasBgColor("#ffffff");
-      }
+      setTimeout(() => {
+        canvasList.push({
+          // canvas
+          canvas: newCanvas,
+          // 画布id
+          id: newCanvas.id,
+          // 画布控制器
+          canvasContext,
+          // 画布的dom节点
+          canvasNode: appCenterEle.children[0],
+          // 画布的图片
+          canvasImg: canvasContext.toDataURL(),
+          // 画布的图层
+          layerList: [],
+        });
+        if (canvasJson === undefined) {
+          // 设置初始化背景色
+          setCanvasBgColor("#ffffff");
+        }
 
-      // 给画布绑定事件
-      canvasBindOn(canvasContext, newCanvas.id);
-      // 更新当前画布下标
-      canvasSelectedIndex.value = canvasList.length - 1;
+        // 给画布绑定事件
+        canvasBindOn(canvasContext, newCanvas.id);
+        // 更新当前画布下标
+        canvasSelectedIndex.value = canvasList.length - 1;
+      }, 200);
     }
     // 将json添加至画布（给画布的每个元素重写toObject方法）
     function canvasLoadFromJson(canvasContext, canvasJson) {
       canvasContext.loadFromJSON(canvasJson);
       canvasContext.getObjects().map((item) => addAnimationToEle(item));
+      // updateTheCanvasImg();
     }
     // 创建新的canvas
     function createNewCanvas() {
@@ -142,12 +147,16 @@ export default {
     // 给画布绑定事件
     function canvasBindOn(canvasContext, canvasId) {
       let index = getCanvasIndexById(canvasId);
+
       canvasContext.on("mouse:out", () => {
         updateTheCanvasImg();
       });
       canvasContext.on("selection:created", () => {
         // 整理图层信息 （获取画布所有元素，并标识出是否被选择出来）
         getLayerInfo(index);
+        setTimeout(() => {
+          updateTheCanvasImg();
+        }, 0);
       });
       canvasContext.on("selection:updated", () => {
         // 整理图层信息 （获取画布所有元素，并标识出是否被选择出来）
@@ -156,6 +165,9 @@ export default {
       canvasContext.on("selection:cleared", () => {
         // 整理图层信息 （获取画布所有元素，并标识出是否被选择出来）
         getLayerInfo(index);
+        setTimeout(() => {
+          updateTheCanvasImg();
+        }, 0);
       });
     }
     // 给整个画布的元素添加
@@ -218,31 +230,22 @@ export default {
       }
     }
     // 更新当画布的图片
-    function updateTheCanvasImg() {
+    function updateTheCanvasImg(canvasContexti, canvasListi) {
       const canvasContext = toRaw(
         canvasList[canvasSelectedIndex.value].canvasContext
       );
-      canvasList[canvasSelectedIndex.value].canvasImg = canvasContext.toDataURL(
-        { format: "png" }
-      );
+      canvasList[canvasSelectedIndex.value].canvasImg =
+        canvasContext.toDataURL();
     }
     function addAnimationToEle(Ele) {
       Ele.toObject = (function (toObject) {
         return function () {
           return fabric.util.object.extend(toObject.call(this), {
             animation: this.animation,
+            imgList: this.imgList,
           });
         };
       })(Ele.toObject);
-      //  canvasContext.getObjects().map((item) => {
-      //   item.toObject = (function (toObject) {
-      //     return function () {
-      //       return fabric.util.object.extend(toObject.call(this), {
-      //         animation: this.animation,
-      //       });
-      //     };
-      //   })(item.toObject);
-      // });
     }
     // 添加文本
     function addText() {
@@ -261,19 +264,81 @@ export default {
       canvasContext.add(text);
       // 设置文本为被选中状态
       canvasContext.setActiveObject(text);
-      // text.animate("angle", "+=100", {
-      //   onChange: canvasContext.renderAll.bind(canvasContext),
-      // });
-      // text.animate("left", "+=100", {
-      //   onChange: canvasContext.renderAll.bind(canvasContext),
-      // });
-      // console.log(text);
 
       // 设置更新画布图片 重写元素toObject方法
       setTimeout(() => {
         updateTheCanvasImg();
         addAnimationToEle(text);
       }, 0);
+    }
+    // 增加图片
+    function addImg(imgUrl) {
+      const canvasContext = toRaw(
+        canvasList[canvasSelectedIndex.value].canvasContext
+      );
+      const newImg = new Image();
+      newImg.crossOrigin = "anonymous";
+      newImg.src = imgUrl;
+      newImg.onload = () => {
+        var imgInstance = new fabric.Image(newImg, {
+          scaleX: 375 / newImg.width / 2,
+          scaleY: 375 / newImg.height / 2,
+          top: 100,
+          left: 94,
+        });
+        canvasContext.add(imgInstance);
+        hideImgMask();
+        // 添加滤镜种类
+        addFilterToImgList(imgInstance);
+        console.log(imgInstance);
+        // 设置文本为被选中状态
+        canvasContext.setActiveObject(imgInstance);
+        // 设置更新画布图片
+        setTimeout(() => {
+          updateTheCanvasImg();
+          addAnimationToEle(imgInstance);
+        }, 0);
+      };
+    }
+    // 增加滤镜种类
+    function addFilterToImgList(imgElement) {
+      // 添加图片滤镜
+      const imgFilterList = [
+        {
+          fliterType: "原色",
+          filterFun: { type: "BaseFilter" },
+        },
+        {
+          fliterType: "夕阳",
+          filterFun: { type: "Sepia" },
+        },
+        {
+          fliterType: "黑白",
+          filterFun: { type: "BlackWhite" },
+        },
+        {
+          fliterType: "黄昏",
+          filterFun: { type: "Vintage" },
+          //  new fabric.Image.filters.Vintage()
+        },
+      ];
+      imgElement.imgList = {
+        content: [],
+        index: 0,
+      };
+      imgFilterList.map((item) => {
+        imgElement.filters.length = 0;
+        imgElement.filters.push(
+          new fabric.Image.filters[item.filterFun.type]()
+        );
+        imgElement.applyFilters();
+        imgElement.imgList.content.push({
+          fliterImg: imgElement.toDataURL(),
+          ...item,
+        });
+      });
+      imgElement.filters.length = 0;
+      imgElement.applyFilters();
     }
     // 显示图片蒙层
     function showImgMask() {
@@ -295,59 +360,7 @@ export default {
     function addAudio(audioUrl) {
       console.log(audioUrl);
     }
-    // 增加图片
-    function addImg(imgUrl) {
-      const canvasContext = toRaw(
-        canvasList[canvasSelectedIndex.value].canvasContext
-      );
-      const newImg = new Image();
-      newImg.crossOrigin = "anonymous";
-      newImg.src = imgUrl;
-      newImg.onload = () => {
-        var imgInstance = new fabric.Image(newImg, {
-          scaleX: 375 / newImg.width / 2,
-          scaleY: 375 / newImg.height / 2,
-          top: 100,
-          left: 94,
-        });
-        canvasContext.add(imgInstance);
-        hideImgMask();
-        // 设置文本为被选中状态
-        canvasContext.setActiveObject(imgInstance);
-        // 设置更新画布图片
-        setTimeout(() => {
-          updateTheCanvasImg();
-          addAnimationToEle(imgInstance);
-        }, 0);
-      };
-      // imgUrl =
-      //   "https://img1.baidu.com/it/u=4216761644,15569246&fm=253&fmt=auto&app=120&f=JPEG?w=500&h=500";
 
-      // fabric.Image.fromURL(
-      //   "https://img1.baidu.com/it/u=4216761644,15569246&fm=253&fmt=auto&app=120&f=JPEG?w=500&h=500",
-      //   function (oImg) {
-      //     // console.log(oImg);
-      //     oImg.scaleX = 375 / oImg.width / 2;
-      //     oImg.scaleY = 375 / oImg.height / 2;
-      //     oImg.top = 100;
-      //     oImg.left = 94;
-
-      //     // oImg.filters.push(new fabric.Image.filters.Sepia());
-      //     // oImg.applyFilters();
-      //     canvasContext.add(oImg);
-      //     // console.log(oImg.toDataURL());
-      //     // canvasContext.renderAll();
-      //     hideImgMask();
-      //     // 设置文本为被选中状态
-      //     canvasContext.setActiveObject(oImg);
-      //     // 设置更新画布图片
-      //     setTimeout(() => {
-      //       updateTheCanvasImg();
-      //       addAnimationToEle(oImg);
-      //     }, 0);
-      //   }
-      // );
-    }
     // 设置画布背景色
     function setCanvasBgColor(color) {
       const canvasContext = toRaw(

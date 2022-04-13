@@ -37,22 +37,6 @@ export default {
       require("@/assets/images/image2.webp"),
       require("@/assets/images/image3.webp"),
       require("@/assets/images/image4.webp"),
-      require("@/assets/images/image1.webp"),
-      require("@/assets/images/image2.webp"),
-      require("@/assets/images/image3.webp"),
-      require("@/assets/images/image4.webp"),
-      require("@/assets/images/image1.webp"),
-      require("@/assets/images/image2.webp"),
-      require("@/assets/images/image3.webp"),
-      require("@/assets/images/image4.webp"),
-      require("@/assets/images/image1.webp"),
-      require("@/assets/images/image2.webp"),
-      require("@/assets/images/image3.webp"),
-      require("@/assets/images/image4.webp"),
-      require("@/assets/images/image1.webp"),
-      require("@/assets/images/image2.webp"),
-      require("@/assets/images/image3.webp"),
-      require("@/assets/images/image4.webp"),
     ]);
     function addImg(imgUrl) {
       context.emit("addImg", imgUrl);
