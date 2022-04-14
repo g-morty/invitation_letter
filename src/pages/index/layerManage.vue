@@ -105,6 +105,18 @@
               <i class="iconfont icon-huihua"></i>
             </div>
           </div>
+          <!-- 透明度 -->
+          <div class="change-opacity-box">
+            <div class="change-opacity-text">
+              透明度
+            </div>
+            <div class="opacity-slider">
+              <Slider class="the-opacity-slider" v-model="eleOpacity" :step="1" />
+              <div class="opacity-slider-text">{{eleOpacity}}%</div>
+            </div>
+          </div>
+          <!-- 设置阴影 -->
+          
           <!-- 移除功能 -->
           <div class="text-control" @click="removeEle(showCanvasTools.content[0].layer)">
             <div class="text-control-text">移除</div>
@@ -120,6 +132,16 @@
                 <img class="filter-item-img" :src="item.fliterImg" alt="">
                 <div class="fliter-item-text">{{item.fliterType}}</div>
               </div>
+            </div>
+          </div>
+          <!-- 透明度 -->
+          <div class="change-opacity-box">
+            <div class="change-opacity-text">
+              透明度
+            </div>
+            <div class="opacity-slider">
+              <Slider class="the-opacity-slider" v-model="eleOpacity" :step="1" />
+              <div class="opacity-slider-text">{{eleOpacity}}%</div>
             </div>
           </div>
           <!-- 移除功能 -->
@@ -197,7 +219,7 @@ export default {
     // 元素操作台数据
     const elementToolsData = reactive({
       elementIndex: 0,
-      showAnimate: false,
+      showAnimate: !false,
       hideAnimate: false,
     });
     const layerList = computed(() =>
@@ -206,62 +228,7 @@ export default {
         : []
     );
 
-    const animateList = reactive([
-      {
-        type: "fadeIn",
-        showText: "淡入",
-        left: -40 * 1,
-        top: 40 * 0,
-        hoverLeft: -40 * 1,
-        hoverTop: 40 * 11,
-        url: require("@/assets/images/anim-iconsprit.webp"),
-      },
-      {
-        type: "shiftInToRight",
-        showText: "向右移入",
-        left: -40 * 7,
-        top: 40 * 2,
-        hoverLeft: -40 * 7,
-        hoverTop: 40 * 9,
-        url: require("@/assets/images/anim-iconsprit.webp"),
-      },
-      {
-        type: "shiftInToLeft",
-        showText: "向右移入",
-        left: -40 * 6,
-        top: 40 * 3,
-        hoverLeft: -40 * 6,
-        hoverTop: 40 * 8,
-        url: require("@/assets/images/anim-iconsprit.webp"),
-      },
-      {
-        type: "shiftInToUp",
-        showText: "向上移入",
-        left: -40 * 9,
-        top: 40 * 0,
-        hoverLeft: -40 * 9,
-        hoverTop: 40 * 11,
-        url: require("@/assets/images/anim-iconsprit.webp"),
-      },
-      {
-        type: "shiftInToDown",
-        showText: "向下移入",
-        left: -40 * 6,
-        top: 40 * 1,
-        hoverLeft: -40 * 6,
-        hoverTop: 40 * 10,
-        url: require("@/assets/images/anim-iconsprit.webp"),
-      },
-      {
-        type: "turnIn",
-        showText: "翻转进入",
-        left: -40 * 1,
-        top: 40 * 7,
-        hoverLeft: -40 * 1,
-        hoverTop: 40 * 4,
-        url: require("@/assets/images/anim-iconsprit.webp"),
-      },
-    ]);
+    const animateList = reactive(animation.enumerate);
 
     // 是否显示元素操作台
     const showCanvasTools = computed({
@@ -284,13 +251,26 @@ export default {
         };
       },
     });
+    // 元素透明度
+    let eleOpacity = computed({
+      get() {
+        return parseInt(showCanvasTools.value.content[0].layer.opacity * 100);
+      },
+      set(v) {
+        let theOpacity = v / 100;
+        // console.log(v);
+        // console.log(parseInt(v));
+        showCanvasTools.value.content[0].layer.opacity = theOpacity;
+        const canvasContext =
+          props.canvasList[props.canvasSelectedIndex].canvasContext;
+        canvasContext.renderAll();
+      },
+    });
 
     // 将滤镜添加至画布
     function addFilterToCanvas(index) {
       // 获取要更改的图片
       const theImg = showCanvasTools.value.content[0].layer;
-      console.log(theImg);
-      
       // 更新当前滤镜下标
       theImg.imgList.index = index;
       // 获取滤镜
@@ -409,12 +389,13 @@ export default {
       const canvasContext = toRaw(
         props.canvasList[props.canvasSelectedIndex].canvasContext
       );
+      // console.log(animation.findEnumerate(type));
       // 遍历元素事件，确定元素是否已经绑定过该动画
       if (element.animation === undefined) {
         element.animation = [
           {
             id: nanoid(),
-            ...animation.enumerate(type),
+            ...animation.findEnumerate(type),
           },
         ];
       } else {
@@ -422,7 +403,7 @@ export default {
         if (!flag) {
           element.animation.push({
             id: nanoid(),
-            ...animation.enumerate(type),
+            ...animation.findEnumerate(type),
           });
         }
       }
@@ -470,6 +451,7 @@ export default {
       bindAnimation,
       removeAnimation,
       removeEle,
+      eleOpacity,
     };
   },
 };
@@ -1037,4 +1019,41 @@ export default {
 .text-control:hover i {
   color: white;
 }
+.change-opacity-box {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 30px;
+  align-items: center;
+}
+.change-opacity-text {
+  width: 50px;
+  font-size: 14px;
+  margin-left: 12px;
+  margin-right: 12px;
+}
+.opacity-slider {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  /* background-color: red; */
+}
+.the-opacity-slider {
+  flex: 1;
+}
+.opacity-slider-text {
+  /* background-color: gray; */
+  text-align: right;
+  margin-right: 12px;
+  margin-left: 12px;
+  font-size: 12px;
+}
+/*  <div class="change-opacity-box">
+            <div class="change-opacity-text">
+              透明度
+            </div>
+            <div class="opacity-slider">
+              <Slider v-model="eleOpacity" />
+              <div class="opacity-slider-text">{{eleOpacity}}%</div>
+            </div>
+          </div> */
 </style>

@@ -290,7 +290,7 @@ export default {
         hideImgMask();
         // 添加滤镜种类
         addFilterToImgList(imgInstance);
-        console.log(imgInstance);
+        // console.log(imgInstance);
         // 设置文本为被选中状态
         canvasContext.setActiveObject(imgInstance);
         // 设置更新画布图片
@@ -485,4 +485,6 @@ export default {
 /* 添加图片过滤器、添加动画、序列化、反序列化、动画运行、音频添加 */
 /* 问题：网络图片报错 https://blog.csdn.net/weixin_30668887/article/details/98822699 */
 /* 三个接口：上传图片、上传序列化画布数据、下载序列化画布数据 */
+
+/* 元素翻转 */
 </style>                       
