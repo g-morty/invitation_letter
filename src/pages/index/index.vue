@@ -1,6 +1,6 @@
 <template>
   <div class="app-box" :style="'height:' + bodyHeight + 'px'">
-    <header-view @addText="addText" @showImgMask="showImgMask" @saveAllCanvas="saveAllCanvas" @showAudioMask="showAudioMask" @hideAudioMask="hideAudioMask" />
+    <header-view @shareInvitationLetter="shareInvitationLetter" @addText="addText" @showImgMask="showImgMask" @saveAllCanvas="saveAllCanvas" @showAudioMask="showAudioMask" @hideAudioMask="hideAudioMask" />
     <div class="app-body">
       <div class="app-left"></div>
       <div class="app-center">
@@ -405,20 +405,24 @@ export default {
     }
     // 保存
     function saveAllCanvas() {
-      const canvasJsonList = canvasList.map((canvasItem) => {
-        const canvasContext = toRaw(canvasItem.canvasContext);
-        // return JSON.stringify(canvasContext)
-        return canvasContext.toObject();
-        // return canvasContext.toSVG();
-      });
-      console.log(canvasJsonList);
-
-      const canvasStr = JSON.stringify(canvasJsonList);
-      localStorage.setItem("canvasList", canvasStr);
+      const canvasJson = getCanvasJsonList();
+      localStorage.setItem("canvasList", canvasJson);
       setTimeout(() => {
         alert("保存成功");
       }, 0);
-      return canvasStr;
+      return canvasJson;
+    }
+    function getCanvasJsonList() {
+      const canvasJsonList = canvasList.map((canvasItem) =>
+        toRaw(canvasItem.canvasContext).toObject()
+      );
+      console.log(canvasJsonList);
+
+      return JSON.stringify(canvasJsonList);
+    }
+    // 分享
+    function shareInvitationLetter() {
+      console.log("00.00");
     }
     /**
      * 返回值
@@ -444,6 +448,7 @@ export default {
       hideAudioMask,
       isShowAudioMask,
       addAudio,
+      shareInvitationLetter,
     };
   },
 };

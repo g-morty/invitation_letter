@@ -36,11 +36,14 @@
 </template>
 
 <script>
-import { reactive, onMounted } from "vue";
-import { nanoid } from "_nanoid@3.3.2@nanoid";
+import { reactive, onMounted ,getCurrentInstance} from "vue";
+// import { nanoid } from "@nanoid";
 export default {
   props: ["isShowImgMask"],
   setup(props, context) {
+    const { proxy } = getCurrentInstance();
+    const { $fabric: fabric, $nanoid: nanoid } = proxy;
+
     const audioList = reactive([
       {
         id: nanoid(),

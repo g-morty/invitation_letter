@@ -17,9 +17,9 @@
         </div>
       </div>
       <div class="header-btn-group">
-        <div class="save-box" @click="goInvitationLetter">预览</div>
+        <!-- <div class="save-box" @click="goInvitationLetter">预览</div> -->
         <div class="save-box" @click="saveAllCanvas">保存</div>
-        <div class="share-box">分享</div>
+        <div class="share-box" @click="shareInvitationLetter">分享</div>
       </div>
     </div>
   </div>
@@ -46,12 +46,16 @@ export default {
     function goInvitationLetter() {
       $router.push({ path: "/invitation_letter" });
     }
+    function shareInvitationLetter() {
+      context.emit("shareInvitationLetter");
+    }
     return {
       addText,
       showImgMask,
       saveAllCanvas,
       goInvitationLetter,
-      showAudioMask
+      showAudioMask,
+      shareInvitationLetter,
     };
   },
 };
