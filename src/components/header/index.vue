@@ -17,9 +17,12 @@
         </div>
       </div>
       <div class="header-btn-group">
-        <!-- <div class="save-box" @click="goInvitationLetter">预览</div> -->
+        <div class="save-box" @click="goInvitationLetter">预览</div>
         <div class="save-box" @click="saveAllCanvas">保存</div>
-        <div class="share-box" @click="shareInvitationLetter">分享</div>
+        <div class="share-box" @click="shareInvitationLetter">
+          分享
+          <ProgressSpinner v-if="isUpdata" strokeWidth="3" />
+        </div>
       </div>
     </div>
   </div>
@@ -28,6 +31,7 @@
 <script>
 import { useRouter } from "vue-router";
 export default {
+  props: ["isUpdata"],
   setup(props, context) {
     const $router = useRouter();
 
@@ -102,9 +106,19 @@ export default {
   background-color: #1261ff;
   color: #fff;
   margin: 0 30px 0 14px;
+  position: relative;
+  overflow: hidden;
 }
 .share-box:hover {
   background-color: #1261ffcc;
+}
+::v-global(.share-box .p-progress-spinner) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
 }
 .edit-tools {
   display: flex;

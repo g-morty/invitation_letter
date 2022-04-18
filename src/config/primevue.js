@@ -14,6 +14,7 @@ import FileUpload from 'primevue/fileupload';
 import Carousel from 'primevue/carousel';
 import Paginator from 'primevue/paginator';
 import Slider from 'primevue/slider';
+import ProgressSpinner from 'primevue/progressspinner';
 
 export default (app) => {
     app.use(PrimeVue);
@@ -31,5 +32,6 @@ export default (app) => {
     app.component('Carousel', Carousel);
     app.component('Paginator', Paginator);
     app.component('Slider', Slider);
+    app.component('ProgressSpinner', ProgressSpinner);
 
 }

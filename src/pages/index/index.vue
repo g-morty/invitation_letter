@@ -1,6 +1,6 @@
 <template>
   <div class="app-box" :style="'height:' + bodyHeight + 'px'">
-    <header-view @shareInvitationLetter="shareInvitationLetter" @addText="addText" @showImgMask="showImgMask" @saveAllCanvas="saveAllCanvas" @showAudioMask="showAudioMask" @hideAudioMask="hideAudioMask" />
+    <header-view :isUpdata="isUpdata" @shareInvitationLetter="shareInvitationLetter" @addText="addText" @showImgMask="showImgMask" @saveAllCanvas="saveAllCanvas" @showAudioMask="showAudioMask" @hideAudioMask="hideAudioMask" />
     <div class="app-body">
       <div class="app-left"></div>
       <div class="app-center">
@@ -39,7 +39,7 @@ export default {
     // 获取全局属性
     const { proxy } = getCurrentInstance();
     // 获取画布插件
-    const { $fabric: fabric, $nanoid: nanoid } = proxy;
+    const { $fabric: fabric, $nanoid: nanoid, $axios } = proxy;
     // 画布列表
     const canvasList = reactive([]);
     // 当前选择的画布
@@ -47,6 +47,8 @@ export default {
     //
     const isShowImgMask = ref(false);
     const isShowAudioMask = ref(false);
+    // 是否在上传的状态
+    const isUpdata = ref(false);
     /**
      * 方法
      * */
@@ -421,8 +423,30 @@ export default {
       return JSON.stringify(canvasJsonList);
     }
     // 分享
-    function shareInvitationLetter() {
-      console.log("00.00");
+    async function shareInvitationLetter() {
+      const canvasJson = getCanvasJsonList();
+      localStorage.setItem("canvasList", canvasJson);
+      isUpdata.value = true;
+      const shareInvitationLetterRes = await $axios.post(
+        "/api/add_new_invitation_letter",
+        {
+          canvasData: canvasJson,
+        }
+      );
+
+      isUpdata.value = false;
+      console.log(shareInvitationLetterRes);
+      if (shareInvitationLetterRes.status === 201) {
+        $router.push({
+          path: "/invitation_letter",
+          query: {
+            invitation_letter_id:
+              shareInvitationLetterRes.data.invitationLetterId,
+          },
+        });
+      } else {
+        alter("分享失败");
+      }
     }
     /**
      * 返回值
@@ -449,6 +473,7 @@ export default {
       isShowAudioMask,
       addAudio,
       shareInvitationLetter,
+      isUpdata,
     };
   },
 };
