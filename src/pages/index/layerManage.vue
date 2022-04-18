@@ -128,8 +128,8 @@
           <div class="image-tool-filter">
             <div class="image-tool-filter-text">滤镜</div>
             <div class="image-tool-filter-list">
-              <div class="image-tool-filter-item" :class="{'image-tool-filter-item-selected': index === item.index}" v-for="(item, index) in showCanvasTools.content[0].layer.imgList.content" :key="index" @click="addFilterToCanvas(index)">
-                <img class="filter-item-img" :src="item.fliterImg" alt="">
+              <div class="image-tool-filter-item" :class="{'image-tool-filter-item-selected': index === showCanvasTools.content[0].layer.imgList.index}" v-for="(item, index) in showCanvasTools.content[0].layer.imgList.content" :key="index" @click="addFilterToCanvas(index)">
+                <!-- <img class="filter-item-img" :src="item.fliterImg" alt=""> -->
                 <div class="fliter-item-text">{{item.fliterType}}</div>
               </div>
             </div>

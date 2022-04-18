@@ -304,43 +304,62 @@ export default {
     }
     // 增加滤镜种类
     function addFilterToImgList(imgElement) {
-      // 添加图片滤镜
-      const imgFilterList = [
-        {
-          fliterType: "原色",
-          filterFun: { type: "BaseFilter" },
-        },
-        {
-          fliterType: "夕阳",
-          filterFun: { type: "Sepia" },
-        },
-        {
-          fliterType: "黑白",
-          filterFun: { type: "BlackWhite" },
-        },
-        {
-          fliterType: "黄昏",
-          filterFun: { type: "Vintage" },
-          //  new fabric.Image.filters.Vintage()
-        },
-      ];
       imgElement.imgList = {
-        content: [],
         index: 0,
+        content: [
+          {
+            fliterType: "原色",
+            filterFun: { type: "BaseFilter" },
+          },
+          {
+            fliterType: "夕阳",
+            filterFun: { type: "Sepia" },
+          },
+          {
+            fliterType: "黑白",
+            filterFun: { type: "BlackWhite" },
+          },
+          {
+            fliterType: "黄昏",
+            filterFun: { type: "Vintage" },
+          },
+        ],
       };
-      imgFilterList.map((item) => {
-        imgElement.filters.length = 0;
-        imgElement.filters.push(
-          new fabric.Image.filters[item.filterFun.type]()
-        );
-        imgElement.applyFilters();
-        imgElement.imgList.content.push({
-          fliterImg: imgElement.toDataURL(),
-          ...item,
-        });
-      });
-      imgElement.filters.length = 0;
-      imgElement.applyFilters();
+      console.log( imgElement );
+      // // 添加图片滤镜
+      // const imgFilterList = [
+      //   {
+      //     fliterType: "原色",
+      //     filterFun: { type: "BaseFilter" },
+      //   },
+      //   {
+      //     fliterType: "夕阳",
+      //     filterFun: { type: "Sepia" },
+      //   },
+      //   {
+      //     fliterType: "黑白",
+      //     filterFun: { type: "BlackWhite" },
+      //   },
+      //   {
+      //     fliterType: "黄昏",
+      //     filterFun: { type: "Vintage" },
+      //     //  new fabric.Image.filters.Vintage()
+      //   },
+      // ];
+
+      // imgFilterList.map((item) => {
+      //   imgElement.filters.length = 0;
+      //   imgElement.filters.push(
+      //     new fabric.Image.filters[item.filterFun.type]()
+      //   );
+      //   imgElement.applyFilters();
+      //   imgElement.imgList.content.push({
+      //     fliterImg: imgElement.toDataURL(),
+      //     ...item,
+      //   });
+      // });
+      // imgElement.filters.length = 0;
+      // imgElement.applyFilters();
     }
     // 显示图片蒙层
     function showImgMask() {
