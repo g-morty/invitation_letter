@@ -54,6 +54,7 @@ export default {
      * */
     onMounted(() => {
       const canvasJsonList = localStorage.getItem("canvasList");
+      // console.log( canvasJsonList );
       // 如果本地没有缓存 添加新的canvas
       if (canvasJsonList === null) {
         addNewCanvas();
@@ -149,6 +150,7 @@ export default {
     // 给画布绑定事件
     function canvasBindOn(canvasContext, canvasId) {
       let index = getCanvasIndexById(canvasId);
+        getLayerInfo(index);
 
       canvasContext.on("mouse:out", () => {
         updateTheCanvasImg();

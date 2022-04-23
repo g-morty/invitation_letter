@@ -9,9 +9,9 @@
           </div>
         </div>
 
-        <!-- <div class="up-local-img">
+        <div class="up-local-img">
           <FileUpload mode="basic" auto accept="image/*" :customUpload="true" @uploader="chooseImage" chooseLabel="选择图片" />
-        </div> -->
+        </div>
       </div>
       <div class="img-list-right">
         <div class="img-type-list">
@@ -28,29 +28,52 @@
 </template>
 
 <script>
-import { reactive } from "vue";
+import { reactive, getCurrentInstance } from "vue";
 export default {
   props: ["isShowImgMask"],
   setup(props, context) {
+    // 获取全局属性
+    const { proxy } = getCurrentInstance();
+    // 获取画布插件
+    const { $axios } = proxy;
+    const temPath = "@/assets/images/aoteman/";
     const imgList = reactive([
-      require("@/assets/images/image1.webp"),
-      require("@/assets/images/image2.webp"),
-      require("@/assets/images/image3.webp"),
-      require("@/assets/images/image4.webp"),
+      // require("@/assets/images/image1.webp"),
+      // require("@/assets/images/image2.webp"),
+      // require("@/assets/images/image3.webp"),
+      // require("@/assets/images/image4.webp"),
     ]);
+    const files = require.context("@/assets/images/aoteman/", false, /\s*/);
+    files.keys().forEach((path) => {
+      imgList.push(require("@/assets/images/aoteman/" + path.substring(2)));
+    });
+
     function addImg(imgUrl) {
       context.emit("addImg", imgUrl);
     }
     function hideImgMask() {
       context.emit("hideImgMask");
     }
+    // 选择图片
+    async function chooseImage(e) {
+      // 定义表单数据
+      const formData = new FormData();
+      // 添加表单数据
+      formData.append("image", e.files[0]);
 
-    function chooseImage(e) {
-      // console.log( e.files[0].objectURL );
+      const chooseImageRes = await $axios.post("/api/upload_img", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      console.log(chooseImageRes);
+      if (chooseImageRes.status === 200) {
+        addImg(chooseImageRes.data);
+      } else {
+        alert("上传失败，请重试");
+      }
       // imgList.push(e.files[0].objectURL)
       // // imgList.push(require(e.files[0].objectURL))
       // console.log("234345345");
-      addImg(e.files[0].objectURL);
+      // addImg(e.files[0].objectURL);
     }
     return {
       imgList,

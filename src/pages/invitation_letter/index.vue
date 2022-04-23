@@ -67,7 +67,6 @@ export default {
       if (canvasJsonRes.status === 200) {
           return canvasJsonRes.data.canvasData;
       }
-      console.log(canvasJsonRes);
     }
     // 添加新的canvas
     function addNewCanvas(canvasJson) {

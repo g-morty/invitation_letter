@@ -116,7 +116,7 @@
             </div>
           </div>
           <!-- 设置阴影 -->
-          
+
           <!-- 移除功能 -->
           <div class="text-control" @click="removeEle(showCanvasTools.content[0].layer)">
             <div class="text-control-text">移除</div>
@@ -125,15 +125,15 @@
         </template>
         <template v-if="showCanvasTools.content[0].layer.type === 'image'">
           <!-- 滤镜 -->
-          <div class="image-tool-filter">
+          <!-- <div class="image-tool-filter">
             <div class="image-tool-filter-text">滤镜</div>
             <div class="image-tool-filter-list">
               <div class="image-tool-filter-item" :class="{'image-tool-filter-item-selected': index === showCanvasTools.content[0].layer.imgList.index}" v-for="(item, index) in showCanvasTools.content[0].layer.imgList.content" :key="index" @click="addFilterToCanvas(index)">
-                <!-- <img class="filter-item-img" :src="item.fliterImg" alt=""> -->
+                <img class="filter-item-img" :src="item.fliterImg" alt="">
                 <div class="fliter-item-text">{{item.fliterType}}</div>
               </div>
             </div>
-          </div>
+          </div> -->
           <!-- 透明度 -->
           <div class="change-opacity-box">
             <div class="change-opacity-text">
@@ -219,7 +219,7 @@ export default {
     // 元素操作台数据
     const elementToolsData = reactive({
       elementIndex: 0,
-      showAnimate: !false,
+      showAnimate: false,
       hideAnimate: false,
     });
     const layerList = computed(() =>
@@ -240,11 +240,15 @@ export default {
             content: {},
           };
         }
+        // console.log(props.canvasList[
+        //   props.canvasSelectedIndex
+        // ]);
         const seletedEle = props.canvasList[
           props.canvasSelectedIndex
         ].layerList.filter((item) => {
           return item.isActive;
         });
+        // console.log(seletedEle);
         return {
           isShow: seletedEle.length === 1,
           content: seletedEle,
